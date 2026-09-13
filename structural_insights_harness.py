@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """Fast CLI regression harness for WoRP Lab Structural Insights.
 
-Runs the same calculate_league_intelligence_cached() function used by
-app_v0_8_0.py without launching Streamlit UI.
-
 First run:
     python3 structural_insights_harness.py setup
 
-Then, after future editor changes:
+Then:
     python3 structural_insights_harness.py
 
-The setup stores a named regression league set under ~/.worp_lab/.
+The harness loads the calculation/editor definitions from the generated app but
+never launches Streamlit UI. It keeps the same WoRP Engine/editor code path while
+stripping Streamlit decorators and top-level UI execution.
 """
 
 from __future__ import annotations
@@ -33,18 +32,41 @@ SLEEPER_BASE = "https://api.sleeper.app/v1"
 
 
 def _get_json(url: str):
-    req = urllib.request.Request(url, headers={"User-Agent": "WoRP-Lab-Harness/0.1"})
+    req = urllib.request.Request(url, headers={"User-Agent": "WoRP-Lab-Harness/0.2"})
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
-def _load_core_namespace(app_path: Path):
-    """Load definitions from the Streamlit app without executing its UI.
+def _is_upper_assignment(node):
+    """Keep module constants needed by calculation helpers, not UI state."""
+    if isinstance(node, (ast.Assign, ast.AnnAssign)):
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        names = [t.id for t in targets if isinstance(t, ast.Name)]
+        return bool(names) and all(n.isupper() for n in names)
+    return False
 
-    We parse the app AST and keep imports / constants / functions / classes only
-    up to the first top-level Streamlit UI call. That means the harness uses the
-    exact same WoRP/editor function while avoiding selectboxes, buttons, charts,
-    session state, and page rendering.
+
+def _strip_decorators(node):
+    """Definitions are identical; Streamlit caching is unnecessary in CLI."""
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        node.decorator_list = []
+    return node
+
+
+def _load_core_namespace(app_path: Path):
+    """Load calculation/editor code from the app without executing its UI.
+
+    Previous harness V0.1 stopped at the first top-level st.* call. Current WoRP
+    apps define calculate_league_intelligence_cached later in the file, after UI
+    setup, so that extractor could never see it.
+
+    V0.2 instead builds a definition-only module containing:
+      * imports
+      * module-level UPPERCASE constants (engine/cache/API constants)
+      * every function/class definition, wherever it appears in the app
+
+    Function decorators are stripped so @st.cache_data does not require a live
+    Streamlit runtime. Function bodies themselves are not rewritten.
     """
     if not app_path.exists():
         raise SystemExit(f"STOP: {app_path} not found. Build V0.8.0 first.")
@@ -52,25 +74,29 @@ def _load_core_namespace(app_path: Path):
     source = app_path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(app_path))
 
-    def is_top_level_streamlit_call(node):
-        if not isinstance(node, ast.Expr) or not isinstance(node.value, ast.Call):
-            return False
-        fn = node.value.func
-        return isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id == "st"
-
     kept = []
     for node in tree.body:
-        if is_top_level_streamlit_call(node):
-            break
-        kept.append(node)
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            kept.append(node)
+        elif _is_upper_assignment(node):
+            kept.append(node)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            kept.append(_strip_decorators(node))
 
     module = ast.Module(body=kept, type_ignores=[])
     ast.fix_missing_locations(module)
     ns = {"__name__": "worp_harness_core", "__file__": str(app_path)}
-    exec(compile(module, str(app_path), "exec"), ns, ns)
+    try:
+        exec(compile(module, str(app_path), "exec"), ns, ns)
+    except Exception as exc:
+        raise SystemExit(f"STOP: could not load app calculation core: {type(exc).__name__}: {exc}")
 
     if "calculate_league_intelligence_cached" not in ns:
-        raise SystemExit("STOP: calculate_league_intelligence_cached not found in extracted app core")
+        funcs = sorted(k for k, v in ns.items() if callable(v) and not k.startswith("__"))
+        raise SystemExit(
+            "STOP: calculate_league_intelligence_cached not found in definition-only app core. "
+            f"Loaded functions: {', '.join(funcs[:25])}"
+        )
     return ns
 
 
