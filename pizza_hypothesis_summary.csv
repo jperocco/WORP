@@ -1,0 +1,2 @@
+matched_wr_player_weeks,tail_player_weeks,tail_pizza_slope_worp_per_1sd,tail_pizza_r2,baseline_r2,baseline_plus_pizza_r2,incremental_r2_pizza,with_interaction_r2,incremental_r2_interaction
+23610,16592,0.005899284942401497,0.008370585541520814,0.3516819023213307,0.36134406197232327,0.009662159650992597,0.40159094025523356,0.04024687828291029
