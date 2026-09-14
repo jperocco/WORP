@@ -11,12 +11,8 @@ import pandas as pd
 ROOT = Path('.')
 
 CANDIDATES = {
-    'full_roster': [
-        'wookiee_full_roster_blocked_worp_player_week_v0_5.csv',
-    ],
-    'ex_ante': [
-        'wookiee_ex_ante_lineup_player_week_v0_6.csv',
-    ],
+    'full_roster': ['wookiee_full_roster_blocked_worp_player_week_v0_5.csv'],
+    'ex_ante': ['wookiee_ex_ante_lineup_player_week_v0_6.csv'],
     'promotion_exposure': [
         'wookiee_non_scoring_exposure_audit_v0_4_player_week.csv',
         'wookiee_non_scoring_exposure_player_week_v0_4.csv',
@@ -49,13 +45,23 @@ missing = required - set(full.columns)
 if missing:
     raise SystemExit(f'STOP: full-roster file missing columns: {sorted(missing)}')
 
-# One row per player-week expected; retain only offensive fantasy positions.
 full = full[full['position'].isin(['QB','RB','WR','TE'])].copy()
-full['real_started'] = full['real_state'].astype(str).str.upper().eq('STARTED')
-full['oracle_started'] = full['oracle_state'].astype(str).str.upper().eq('STARTED')
 
-# Historical realized lineup-use depth. This is descriptive evidence only,
-# not the Scoring Bench definition.
+# Canonical V0.5 state values observed in the source file.
+real_values = set(full['real_state'].dropna().astype(str).unique())
+oracle_values = set(full['oracle_state'].dropna().astype(str).unique())
+expected_real = {'REAL_STARTED', 'REAL_BENCHED'}
+expected_oracle = {'ORACLE_SELECTED', 'ORACLE_BLOCKED'}
+if not real_values.issubset(expected_real):
+    raise SystemExit(f'STOP: unexpected real_state values: {sorted(real_values)}')
+if not oracle_values.issubset(expected_oracle):
+    raise SystemExit(f'STOP: unexpected oracle_state values: {sorted(oracle_values)}')
+
+full['real_started'] = full['real_state'].eq('REAL_STARTED')
+full['oracle_started'] = full['oracle_state'].eq('ORACLE_SELECTED')
+
+print(f"\nState mapping check: REAL_STARTED={int(full['real_started'].sum())}; ORACLE_SELECTED={int(full['oracle_started'].sum())}")
+
 usage = (
     full.groupby(['season','roster_id','player_id','position'], as_index=False)
         .agg(
@@ -72,14 +78,8 @@ for pos in ['QB','RB','WR','TE']:
     if g.empty:
         continue
     for threshold in [1,2,3,4,5,6,8,10]:
-        real_counts = (
-            g.assign(hit=g.real_starts.ge(threshold))
-             .groupby(['season','roster_id'])['hit'].sum()
-        )
-        oracle_counts = (
-            g.assign(hit=g.oracle_starts.ge(threshold))
-             .groupby(['season','roster_id'])['hit'].sum()
-        )
+        real_counts = g.assign(hit=g.real_starts.ge(threshold)).groupby(['season','roster_id'])['hit'].sum()
+        oracle_counts = g.assign(hit=g.oracle_starts.ge(threshold)).groupby(['season','roster_id'])['hit'].sum()
         rows.append({
             'position': pos,
             'min_starts': threshold,
@@ -92,7 +92,6 @@ for pos in ['QB','RB','WR','TE']:
 util = pd.DataFrame(rows)
 util.to_csv('wookiee_roster_construction_utilization_v0_1.csv', index=False)
 
-# Position-level realized/captured context from the same historical roster data.
 pos = (
     full.groupby('position', as_index=False)
         .agg(
@@ -105,9 +104,6 @@ pos = (
 )
 pos.to_csv('wookiee_roster_construction_position_context_v0_1.csv', index=False)
 
-# Worksheet intentionally leaves economic zones unresolved. The next pass must
-# combine league-specific slot eligibility + WoRP curves/replacement with this
-# historical utilization evidence. Blank fields prevent false precision.
 worksheet = pd.DataFrame([
     {'position':'QB','starting_demand':'FORMAT_DERIVED','scoring_depth_zone':'TBD','transition_zone':'TBD','optionality_hurdle':'TBD','confidence':'TBD','reason':'Resolve from QB-eligible slots + relative economic quality; QB3 is not automatically Non-Scoring.'},
     {'position':'RB','starting_demand':'FORMAT_DERIVED','scoring_depth_zone':'TBD','transition_zone':'TBD','optionality_hurdle':'TBD','confidence':'TBD','reason':'Resolve shared FLEX demand before comparing additional RB depth with contingent optionality.'},
