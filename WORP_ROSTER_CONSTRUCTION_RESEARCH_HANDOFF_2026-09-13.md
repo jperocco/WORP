@@ -1,6 +1,6 @@
 # WoRP Lab — Roster Construction Research Handoff
 
-Date: 2026-09-13
+Date: 2026-09-14
 Status: PAUSED / READY TO RESUME
 
 ## Product objective
@@ -231,3 +231,27 @@ Canonical product philosophy:
 **evidence → structural hypothesis → roster-construction story → relevance test → dedupe → high-value actionable insight**
 
 The product now needs the roster-construction intelligence layer more than another threshold-optimization exercise.
+
+## Frontend access workflow — validated 2026-09-14
+
+A local double-click launcher was created for the user:
+
+`Abrir_WoRP_Lab.command`
+
+Expected local repo path:
+
+`~/Downloads/worp/worp_lab_v0_2_1`
+
+Launcher behavior:
+1. enters the local WoRP Lab directory;
+2. runs `git pull --ff-only`;
+3. selects the highest-version local `app_v0_*.py` using version sort;
+4. launches it through Streamlit, preferring `python3.12` when available and falling back to `python3`.
+
+The downloaded `.command` initially lacked executable permission. This was fixed once with:
+
+`chmod +x /Users/jperocco/Downloads/Abrir_WoRP_Lab.command`
+
+After that, double-clicking the launcher successfully opened the frontend.
+
+Operational preference: for normal frontend access, prefer this launcher over making the user navigate through Terminal manually. If a future frontend version is committed and pulled locally, the launcher is designed to select the newest `app_v0_*.py` automatically.
