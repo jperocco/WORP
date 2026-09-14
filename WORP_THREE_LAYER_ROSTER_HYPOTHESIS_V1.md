@@ -4,7 +4,9 @@ Status: RESEARCH HYPOTHESIS — NOT PRODUCT TRUTH
 
 ## Objective
 
-Test whether league-specific roster construction can be described through three functional layers rather than fixed positional depth rules.
+Test whether league-specific roster construction can be described through three **fluid functional states** rather than fixed positional depth rules.
+
+The three layers are not permanent player classifications. A player can move between them as role, opportunity, health, depth chart and roster context change.
 
 ## Layer 1 — STARTERS
 
@@ -20,79 +22,108 @@ Bench players deliberately rostered because there is a reasonable expectation th
 
 The size of this layer must be discovered empirically, not assumed. In a start-11 format, do not predeclare that four, five, or any other number of scoring-bench players is optimal.
 
-Candidate diagnostic: after the nominal starter layer, measure how frequently successive roster-depth levels enter the optimal legal lineup (ORACLE / Teto perfeito). Look for a meaningful utilization decline/cliff rather than imposing a fixed bench count.
-
 ## Layer 3 — NON-SCORING / CONTINGENT BENCH
 
 Players not normally expected to enter the lineup. Their roster value depends primarily on observable changes of state that can transform their expected role/value.
 
-Examples of the concept:
+Examples:
 - backup NFL QB becomes starter;
 - backup RB inherits major workload after starter absence;
 - other role/depth-chart changes that create a material week-to-week opportunity jump.
 
-The research question is which positions and player archetypes produce these state changes most often, how large the resulting WoRP opportunity is, and how identifiable the change is before kickoff.
+This layer is not automatically waiver/free. A contingent player may already be rostered. NON-SCORING/CONTINGENT is a roster-function state, not a market-availability label.
 
-This layer is not automatically waiver/free. A contingent player may already be rostered. NON-SCORING/CONTINGENT is a roster-function concept, not a market-availability label.
+## States are fluid
+
+A player may follow a path such as:
+
+**NON-SCORING → SCORING BENCH → STARTER**
+
+and later move back down the stack.
+
+The research therefore should not attempt to permanently label players as one of the three types. It should identify the player's current functional state and meaningful transitions between states.
+
+## Promotion Event
+
+A **Promotion Event** is not a fourth roster layer. It is an event that materially changes a player's expected role or usefulness and can move the asset upward through the roster states.
+
+Examples include injury ahead of the player, a depth-chart promotion, becoming an NFL starting QB, or another durable opportunity change.
+
+A promotion can create two distinct forms of value:
+
+1. **Sporting value / WoRP opportunity** — if the player becomes lineup-worthy and is actually started, his WoRP can be captured.
+2. **Asset-value opportunity** — the player's dynasty/trade value may increase even if the manager does not need to start him.
+
+These must remain analytically separate. WoRP can measure the sporting side. Trade/market appreciation requires a separate valuation layer and must not be inferred from WoRP alone.
+
+## Roster recycling hypothesis
+
+If a NON-SCORING player experiences a durable Promotion Event, the roster may gain surplus productive depth or asset value. That can create an opportunity to:
+
+**PROMOTE / START / KEEP / TRADE → free or reallocate roster capacity → acquire another contingent option**
+
+Conceptually:
+
+**acquire cheap optionality → wait for state change → capture production and/or asset appreciation → retain or trade promoted value → recycle roster spot into new optionality**
+
+This is a hypothesis to test, not a proven strategy.
 
 ## Central construction hypothesis
 
 Roster construction may be represented as:
 
-**Starting Capacity + Planned Scoring Depth + Contingent Upside**
+**Starting Capacity + Planned Scoring Depth + Contingent Optionality**
 
-Once a league's normal scoring-depth requirement is satisfied, marginal roster spots may be better evaluated by their contingent upside rather than by accumulating additional players with low normal lineup utilization.
+The manager needs both production and roster asset accumulation. Once normal scoring-depth requirements are satisfied, marginal roster spots may be better evaluated by their probability and magnitude of useful state change rather than simply by accumulating additional low-utilization scoring depth.
 
-This is a hypothesis to test, not a conclusion.
+The eventual league-specific question is:
+
+> After satisfying Starter + Scoring Bench needs, which positions/archetypes offer the best combination of promotion probability, post-promotion sporting value, identifiability before kickoff, persistence of the new state, and — in a separate valuation layer — asset appreciation?
 
 ## Research sequence
 
-### Stage A — Find the Scoring-Bench frontier
+### Stage A — Estimate normal scoring-depth demand
 
-Using actual league format, rosters and weekly outcomes:
+Using actual league format, rosters and weekly outcomes, characterize how many players beyond the lineup core are recurrently consumed by normal lineup operation.
 
-1. Build the optimal legal lineup from each roster-week (ORACLE).
-2. Rank/organize roster depth using a legitimate pre-week or season-level economic ordering without using target-week outcome to define the ordering.
-3. Measure for each depth level / economically meaningful tier:
-   - eligible roster-weeks;
-   - ORACLE lineup-hit weeks;
-   - lineup-hit rate;
-   - persistence of lineup-hit status;
-   - positive WoRP produced outside ORACLE;
-   - positive WoRP selected by ORACLE.
-4. Search for a meaningful utilization decline/cliff after the starter layer.
-5. Do not force a universal bench count or equal-sized positional tiers.
+Do not force a universal bench count or arbitrary frequency cutoff. Initial Wookiee utilization work showed a gradual curve rather than an obvious cliff, so frequency alone cannot define the layers.
 
-Purpose: estimate how much planned scoring depth a specific league can economically use.
+### Stage B — Detect state transitions
 
-### Stage B — Decompose the frontier by position
+Identify players moving from low expected lineup utilization into materially higher opportunity states. Measure:
+- baseline lineup utilization;
+- size of opportunity change;
+- duration/persistence of the promoted state;
+- subsequent lineup-worthiness;
+- WoRP produced after promotion;
+- WoRP actually captured when started;
+- whether the state change was identifiable before kickoff.
 
-After a league-level frontier is visible, analyze QB, WR, RB and TE behavior.
+### Stage C — Compare promotion behavior by position/archetype
 
-QB: Superflex is the primary informative case, with 1QB as structural contrast. Test persistent elite occupancy versus ambiguous competition among similarly valued QBs.
+QB: Superflex primary case, 1QB structural contrast. Test backup-to-starter transitions and ambiguity among multiple usable QBs.
 
-WR: test whether deeper WR tiers remain frequently lineup-worthy but create weekly selection ambiguity.
+RB: test injury/depth-chart driven workload jumps and whether they create relatively legible promotion events.
 
-RB: use as contrast/control for the hypothesis that state changes can create large, more legible workload/value jumps.
+WR: test whether state changes are smaller/more gradual or whether specific archetypes generate durable promotion events.
 
-TE: test persistent elite occupancy, FLEX paths and contingent role changes under actual eligibility.
+TE: test elite-slot persistence, FLEX paths and opportunity changes under actual eligibility.
 
-### Stage C — Identify contingent-upside behavior
+Do not assume any positional ordering before measurement.
 
-For players outside normal planned scoring depth, detect week-to-week state changes and measure:
-- baseline lineup-hit frequency;
-- frequency of material role/opportunity jumps;
-- magnitude of WoRP change after the jump;
-- whether the change was knowable before kickoff;
-- duration/persistence of the changed state.
+### Stage D — Add asset valuation separately
 
-Only after this stage can the project compare which positions/archetypes are best suited to contingent roster spots.
+Only after sporting state transitions are validated should the project introduce dynasty market/trade valuation data to test whether promotion events also create monetizable asset appreciation.
+
+This layer is necessary to study SELL / HOLD / RECYCLE decisions. WoRP alone cannot establish trade value.
 
 ## Existing evidence that motivates, but does not prove, this framework
 
 Prior full-roster audit V0.5 found that only ~5.9% of owned positive WoRP was structurally blocked by the optimal legal lineup. QB had the largest blocked share (~12.0%), while WR/RB/TE were much lower. For WR, missed-lineup positive WoRP was substantially larger than structurally blocked positive WoRP.
 
-Therefore the research should not assume that bench depth is broadly wasteful. The important unresolved problem is how often depth is normally usable, how difficult it is to select, and when contingent state changes create a better use of marginal roster spots.
+The first utilization-frequency audit also found no obvious cliff after the nominal Start-11 boundary: utilization declined gradually through roster depth. Therefore a fixed "11 + N" definition should not be imposed from frequency alone.
+
+These findings motivate a state-transition framework rather than a static bench-depth classification.
 
 ## Guardrails
 
@@ -102,10 +133,13 @@ Therefore the research should not assume that bench depth is broadly wasteful. T
 - Legal eligibility is not realized positional allocation.
 - FLEX belongs to its eligibility set, not automatically to WR/RB/TE.
 - NON-SCORING BENCH is not synonymous with FREE, waiver, fungible, replacement or valueless.
+- The three roster layers are states, not permanent player labels.
+- A Promotion Event is a transition, not a fourth layer.
 - SCORING BENCH size must be discovered by league/format, not hard-coded.
 - Do not assume RB contingent upside beats WR/QB/TE; test it.
-- Do not assume season rank alone defines roster layer.
 - Do not use target-week outcomes as pregame signals.
+- WoRP measures sporting value, not dynasty market/trade price.
+- Asset appreciation and sell/recycle decisions require a separate valuation layer.
 - Do not translate this into production recommendations until validated across materially different formats.
 
 ## Product destination if validated
@@ -113,7 +147,8 @@ Therefore the research should not assume that bench depth is broadly wasteful. T
 The long-term product goal is individualized roster-construction guidance by league, potentially answering:
 
 1. how much normal scoring depth the format can use;
-2. where additional depth begins to have low normal lineup utilization;
-3. which positions/archetypes historically provide the strongest identifiable contingent upside for remaining roster spots.
+2. how much roster capacity can be allocated to contingent optionality;
+3. which positions/archetypes produce the strongest identifiable and persistent Promotion Events;
+4. when a promoted player should strengthen the scoring layers versus, after a separate valuation analysis, become a candidate for value recycling.
 
 The frontend should express this in manager language, not research labels such as ORACLE.
