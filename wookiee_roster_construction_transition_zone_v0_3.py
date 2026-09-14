@@ -1,6 +1,5 @@
 from pathlib import Path
 import pandas as pd
-import numpy as np
 
 # Roster Construction Transition Zone V0.3
 # Converts V0.2 crosswalk into descriptive economic landmarks.
@@ -8,22 +7,28 @@ import numpy as np
 
 ROOT = Path('.')
 JOIN = ROOT / 'wookiee_roster_construction_usage_economic_join_v0_2.csv'
-FRONT = ROOT / 'wookiee_roster_construction_frontiers_v0_2.csv'
 OUT = ROOT / 'wookiee_roster_construction_transition_zone_v0_3.csv'
 
 if not JOIN.exists():
     raise SystemExit('STOP: run V0.2 first; usage-economic join is missing.')
 
 d = pd.read_csv(JOIN)
-needed = {'season','roster_id','player_id','position','real_starts','pos_rank','worp','starter_cutoff_rank','replacement_effective_rank'}
+# V0.2 stores the league-native frontier columns with their original ranking-file names.
+needed = {
+    'season','roster_id','player_id','position','real_starts','pos_rank','worp',
+    'avg_starter_cutoff_rank','avg_replacement_effective_rank'
+}
 missing = needed - set(d.columns)
 if missing:
     raise SystemExit(f'STOP: V0.2 join missing columns: {sorted(missing)}')
 
 d = d[d.position.isin(['QB','RB','WR','TE'])].copy()
-d = d.dropna(subset=['real_starts','pos_rank','worp','starter_cutoff_rank','replacement_effective_rank'])
-d['rank_minus_starter'] = d.pos_rank - d.starter_cutoff_rank
-d['rank_minus_replacement'] = d.pos_rank - d.replacement_effective_rank
+num = ['real_starts','pos_rank','worp','avg_starter_cutoff_rank','avg_replacement_effective_rank']
+for c in num:
+    d[c] = pd.to_numeric(d[c], errors='coerce')
+d = d.dropna(subset=num)
+d['rank_minus_starter'] = d.pos_rank - d.avg_starter_cutoff_rank
+d['rank_minus_replacement'] = d.pos_rank - d.avg_replacement_effective_rank
 
 # Mutually exclusive utilization bands: avoids the cumulative-threshold illusion.
 def usage_band(x):
