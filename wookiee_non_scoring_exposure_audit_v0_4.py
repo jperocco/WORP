@@ -92,14 +92,10 @@ def main():
         d["season"] = pd.to_numeric(d["season"], errors="coerce").astype("Int64")
         d["week"] = pd.to_numeric(d.get("week"), errors="coerce").astype("Int64") if "week" in d.columns else None
 
-    # One row per rostered player-week. V0.6 already represents the roster snapshot used
-    # by the lineup audit; de-duplicate defensively.
     keys = ["season", "week", "roster_id", "player_id"]
     b = b.sort_values(keys).drop_duplicates(keys, keep="last").copy()
     b = b[b["position"].isin(["QB", "RB", "WR", "TE"])].copy()
 
-    # IMPORTANT: all rolling features are shifted one week. Target-week outcomes never
-    # enter the pre-week state proxy.
     gcols = ["season", "roster_id", "player_id"]
     b = b.sort_values(gcols + ["week"]).reset_index(drop=True)
 
@@ -116,17 +112,12 @@ def main():
             b.groupby(gcols)["week"]
              .transform(lambda s: s.shift(1).rolling(lb, min_periods=1).count())
         )
-
-        # Conservative optionality-exposure proxy: at least two prior observations and
-        # zero actual starts + zero Oracle selections in the recent lookback.
         b[f"non_scoring_proxy_l{lb}"] = (
             (b[f"prior_obs_l{lb}"] >= 2)
             & (b[f"prior_real_starts_l{lb}"] == 0)
             & (b[f"prior_oracle_starts_l{lb}"] == 0)
         )
 
-    # First trigger of each V0.3.1 episode. Matching exposure to trigger week asks:
-    # was this asset in the low-use proxy state immediately before the detector fired?
     ep = ep.copy()
     ep["trigger_start_week"] = pd.to_numeric(ep["trigger_start_week"], errors="coerce").astype("Int64")
     ep["active_start_week"] = pd.to_numeric(ep["active_start_week"], errors="coerce").astype("Int64")
@@ -147,10 +138,10 @@ def main():
     detail.to_csv(OUT_DETAIL, index=False)
 
     rows = []
-    for pos, x in detail.groupby("position"):
+    for position_name, x in detail.groupby("position"):
         triggers = x[x["promotion_episode_trigger"]]
         rows.append({
-            "position": pos,
+            "position": position_name,
             "non_scoring_proxy_player_weeks": int(len(x)),
             "unique_players_exposed": int(x["player_id"].nunique()),
             "promotion_episode_triggers": int(triggers["promotion_episode_trigger"].sum()),
@@ -163,18 +154,18 @@ def main():
             "produced_worp_per_100_exposure_weeks": 100.0 * safe_div(pd.to_numeric(triggers["positive_worp_produced"], errors="coerce").fillna(0).sum(), len(x)),
             "captured_worp_per_100_exposure_weeks": 100.0 * safe_div(pd.to_numeric(triggers["captured_positive_worp"], errors="coerce").fillna(0).sum(), len(x)),
         })
-    pos = pd.DataFrame(rows).sort_values("position")
-    pos.to_csv(OUT_POS, index=False)
+    pos_summary = pd.DataFrame(rows).sort_values("position")
+    pos_summary.to_csv(OUT_POS, index=False)
 
     sens_rows = []
     for lb in LOOKBACKS:
         flag = f"non_scoring_proxy_l{lb}"
-        for pos, x in b[b[flag]].groupby("position"):
+        for position_name, x in b[b[flag]].groupby("position"):
             n = len(x)
             trig = int(x["promotion_episode_trigger"].sum())
             sens_rows.append({
                 "lookback_weeks": lb,
-                "position": pos,
+                "position": position_name,
                 "exposure_player_weeks": n,
                 "promotion_episode_triggers": trig,
                 "proxy_promotion_rate_per_player_week": safe_div(trig, n),
@@ -197,7 +188,7 @@ def main():
     print(f"V0.3.1 episodes matched to primary proxy: {len(matched_episode_ids):,}/{all_episode_count:,}")
 
     print("\nPOSITION SUMMARY — PRIMARY PROXY")
-    print(pos.round(4).to_string(index=False))
+    print(pos_summary.round(4).to_string(index=False))
 
     print("\nSENSITIVITY — LOOKBACK 3/5/8")
     print(sens.round(5).to_string(index=False))
