@@ -2,6 +2,10 @@
 
 Research engine for **Wins over Replacement Player** in custom fantasy-football formats.
 
+## Current product status
+
+The latest product decisions, version distinction, rejected detours, and immediate next steps are recorded in [`WORP_PRODUCT_STATUS_2026-09-15.md`](WORP_PRODUCT_STATUS_2026-09-15.md).
+
 ## What changed in V0.2
 
 V0.2 replaces the provisional Normal/50-50 win model from V0.1.x with an **empirical Monte Carlo win model**.
