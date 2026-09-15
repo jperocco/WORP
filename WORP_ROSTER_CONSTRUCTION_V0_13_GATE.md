@@ -1,7 +1,7 @@
 # WoRP Lab — Roster Construction V0.13 Gate
 
 ## Status
-V0.13 translation: PASS as a structural constraint map; NOT empirical proof of non-Wookiee roster-count optima.
+V0.13 translation: PASS as a structural constraint map; NOT empirical proof of roster-count optima.
 
 ## What V0.13 established
 The construction layer can and must treat these league dimensions independently:
@@ -23,32 +23,36 @@ The positional economic supply responds coherently to format:
 
 V0.13 also shows many legally/economically feasible whole-roster constructions at the same Scoring surplus. Therefore feasibility alone cannot choose an optimal tuple or surplus.
 
-## Wookiee empirical anchor
-Wookiee starts 11. V0.12/V0.12.1 replicated across 2023–2025 that exact-starter Scoring coverage is too shallow. The decision-relevant resilience region is approximately 13–15 Scoring (+2 to +4 above starters), with >=.50 lost-Oracle-WoRP rates falling to roughly 4% around 14 Scoring and roughly 1–3% around 15.
+## Wookiee empirical status — PROVISIONAL
+V0.12/V0.12.1 produced a striking descriptive pattern across 2023–2025, with lost-Oracle-WoRP declining as Scoring depth rose. However, the exact-family comparisons can have unequal roster-week support because infeasible family/roster-week combinations were skipped. Total/mean loss comparisons can therefore be biased by denominator/support differences.
 
-This is a Wookiee empirical anchor, not a universal +2/+4 rule.
+Accordingly, the apparent Wookiee +2/+4 resilience region is NOT yet an empirical anchor and must not be frozen or generalized.
+
+Required correction: V0.12.2 compares Scoring totals 11..15 on common roster-week support and, within each roster-week x Scoring total, uses the best feasible positional family. This tests Scoring-core SIZE under a hindsight-favorable flexible-family envelope rather than rewarding an exact tuple for skipping difficult weeks.
 
 ## Gate conclusion
-Do NOT productize raw roster-count envelopes for non-Wookiee formats from V0.13 alone.
+Do NOT productize raw roster-count envelopes for any format from V0.13 alone.
 
-The next evidence requirement is empirical multi-league / multi-format validation. For each observed league-season:
-1. read actual league settings from Sleeper readonly;
-2. reconstruct team count, roster positions, starter count, FLEX/SF eligibility, scoring settings and roster size;
-3. compute/use league-native WoRP economics;
-4. reconstruct roster-weeks and test lost Oracle WoRP as Scoring depth changes;
-5. express the result both as raw Scoring count and surplus relative to that league's starting-lineup demand;
-6. compare whether the elbow/resilience zone moves coherently with format.
+Evidence sequence:
+1. run V0.12.2 fair-support correction for Wookiee;
+2. discover user-linked Sleeper league-seasons and their actual settings;
+3. for each supported league-season, reconstruct team count, roster positions, starter count, FLEX/SF eligibility, scoring settings and roster size;
+4. compute/use league-native WoRP economics;
+5. reconstruct roster-weeks and test lost Oracle WoRP as Scoring depth changes on fair support;
+6. express results as raw Scoring count and surplus relative to starting-lineup demand;
+7. test whether broad elbow/resilience ranges move coherently with league format.
 
 ## Required interpretation
-- Do not force Wookiee +2/+4 onto Start8/Start10/other Start11 leagues.
+- Do not force any Wookiee surplus onto Start8/Start10/other Start11 leagues.
 - Do not infer optimal Scoring count from economic supply divided by team count.
 - Do not infer optimal tuple from number of feasible constructions.
 - Do not let total roster size inflate Scoring demand automatically.
-- Preserve broad ranges when neighboring counts imply the same decision.
-- Apply the <4% relevance STOP when residual differences cease to alter roster construction.
+- Preserve broad ranges when neighboring counts imply the same roster decision.
+- There is no validated universal 4% relevance threshold. Apply materiality/STOP only when residual differences cannot plausibly change roster construction, lineup decisions, or meaningful weekly/season outcomes.
 - FREE/waiver remains Non-Scoring replenishment and need not directly generate WoRP.
+- .25/.50/.75 remain sensitivity probes, not universal semantic thresholds.
 
-## Data blocker / next implementation
-Sleeper readonly can validate many league formats only if league IDs are discoverable/available. There is no general random/all-leagues endpoint. Wookiee alone cannot empirically validate the six fixture formats.
+## Sleeper readonly implementation
+User-linked league discovery removes the need to manually supply league IDs. The discovery harness resolves a Sleeper username, inventories NFL league-seasons and settings, and preserves lineage metadata. Sleeper still has no general random/all-leagues endpoint, so the empirical universe is the set of discoverable/user-linked leagues with compatible historical WoRP inputs.
 
-Next implementation should be a reusable multi-league validation harness that accepts a list of Sleeper league IDs (or user-linked league discovery), reads settings automatically, classifies slot eligibility from `roster_positions`, and runs the V0.12 depth-capture test league by league. The harness must fail transparently when a league's historical lineage or WoRP inputs are unavailable rather than filling gaps with Wookiee assumptions.
+The multi-league validation harness must fail transparently when lineage or WoRP inputs are unavailable rather than filling gaps with Wookiee assumptions.
