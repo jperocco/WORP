@@ -14,6 +14,7 @@ import json
 import math
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 import worp_roster_diagnostic_live_economics_v0_28 as v28
@@ -152,7 +153,9 @@ def main() -> None:
 
     numeric_columns = ["pos_rank", "weeks", "season_worp", "mean_weekly_worp"]
     numeric = live[numeric_columns].apply(pd.to_numeric, errors="coerce")
-    finite = numeric.notna().all().all() and numeric.applymap(math.isfinite).all().all()
+    finite = numeric.notna().all().all() and bool(
+        np.isfinite(numeric.to_numpy(dtype=float)).all()
+    )
     audit(checks, "FINITE_NUMERICS", "PASS" if finite else "FAIL", f"invalid cells={int(numeric.isna().sum().sum())}")
 
     ranks = numeric["pos_rank"]
