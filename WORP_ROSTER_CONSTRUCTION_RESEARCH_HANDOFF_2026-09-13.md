@@ -1,257 +1,243 @@
 # WoRP Lab — Roster Construction Research Handoff
 
-Date: 2026-09-14
-Status: PAUSED / READY TO RESUME
+Date: 2026-09-15
+Status: ACTIVE — HIERARCHY RESET
 
 ## Product objective
 
-The purpose of this research is not to mathematically classify every player into a perfect state. The product objective is to recommend an ideal roster-construction model from the league format, then alert the user when fluid player-state changes cause the roster to drift away from that model.
+WoRP Lab remains a sporting-performance product. It does NOT need to model trade prices, picks, ADP, market value, or asset valuation.
 
-Canonical pipeline:
+Current product hierarchy:
 
-**league format → lineup demand → required Scoring Depth → point where additional positional capital loses lineup utility → remaining roster capacity demands Optionality**
+1. WoRP / league economic map.
+2. What This League Is Telling You.
+3. Value Cliffs.
+4. Roster Construction — primary research priority.
+5. Roster Diagnostic — next product layer after construction logic is sufficiently validated.
+6. Research-to-editor automation / Top-5 publication bridge — LAST backlog item, not a current priority.
 
-The eventual product should answer questions such as:
-- How much productive/lineup depth should this format carry at QB/RB/WR/TE?
-- When is an additional player at a position still useful Scoring Depth?
-- When has the roster crossed into Non-Scoring capacity, where the hurdle becomes optionality/state-change upside rather than ordinary lineup coverage?
-- When a player changes state, has the roster become overweight in an upper layer and should the manager KEEP / START / TRADE / RECYCLE?
+The main research goal is to turn league economics into a decision-useful answer to:
 
-The goal is a useful roster-construction recommendation, not false mathematical precision.
+> **How deep at each position does sporting production remain materially capable of helping win, with enough consistency and repeatability to matter?**
 
-## Canonical three fluid states
+The product should prefer simple, decision-material boundaries/zones over mathematically elaborate state classifiers.
 
-The states are functional and fluid, not permanent player classes.
+## New primary abstraction — Material Production Cutline
 
-1. **STARTER** — principal productive capital; expected normal lineup core.
-2. **SCORING BENCH** — reserve productive capital; players deliberately rostered because they have a meaningful expectation of entering the lineup during normal seasonal operation (injury, bye, matchup, legitimate competition/rotation).
-3. **NON-SCORING BENCH** — optional capital; low normal lineup-use expectation, rostered primarily for a meaningful state-change opportunity.
+Roster Construction should first seek the positional region where WoRP stops being materially relevant to winning.
 
-Typical transition:
+For each position and league format, ask:
 
-**NON-SCORING → SCORING BENCH → STARTER**
+- Where is WoRP magnitude still large enough to matter?
+- How consistently does that impact occur?
+- How repeatable is the result across seasons?
+- At what depth/rank does the distribution effectively become economic zero for normal winning production?
 
-and players can later move back down.
+Examples of the question, NOT assumed answers:
+- Does RB impact remain material through roughly RB35?
+- Does WR impact remain material through roughly WR35, WR45, or somewhere else?
+- Does the same cut region recur across seasons and formats?
 
-A **Promotion Event** is a transition/new-information event, not a fourth state.
+**Economic zero does not mean mathematical WoRP = 0.000.** It means remaining differences are too small, too rare, or too unstable to plausibly change roster construction, weekly outcomes, or season-winning decisions.
 
-Important: "Scoring Bench" does NOT mean bench points are captured. **WoRP is captured only when the player is actually STARTED.**
+The cutline should be discovered from the data, not assumed from conventional fantasy ranks.
 
-## Asset-value logic
+## Governing materiality principle
 
-WoRP measures sporting value, not trade/market value.
+Optimize research for large, decision-material impacts.
 
-A state change can create two different forms of value:
-1. sporting/lineup value, measurable through WoRP if the player is started;
-2. asset/market appreciation, which requires a separate valuation layer and must not be inferred from WoRP alone.
+Small differences such as 0.061 vs 0.045 WoRP are operationally zero vs zero unless there is evidence that they compound into a material weekly/season effect.
 
-Conceptual optionality cycle:
+Before spending research time on a difference, ask:
 
-**acquire cheap optionality → wait for state change → capture production and/or asset appreciation → retain/start/trade promoted value → recycle roster capacity into new optionality**
+> **Could this plausibly change how a manager builds a roster, sets a lineup, or wins meaningful weeks/seasons?**
 
-This cycle is a product hypothesis, not yet proof that waiver cycling is always optimal.
+If no, classify it as noise and STOP.
 
-## Critical roster-context principle — QB1 + QB1 + QB1
+Do not optimize thresholds by tiny increments. Seek robust zones where the decision changes.
 
-Do NOT force player names, fixed ranks or ordinal depth-chart labels into the state model.
+If a residual technical dispute affects less than 4% of the relevant universe and cannot change the decision, trigger STOP rather than continue tuning.
 
-The state depends on the relationship between:
-- economic quality of the assets;
-- number and eligibility of starting slots;
-- competition among similar assets;
-- expected temporal lineup use.
+## Roster Construction — simplified hierarchy
 
-Example in Superflex with two QB-eligible lineup spots:
-- QB1 + QB1 + QB1: the third QB is NOT automatically Non-Scoring. Three similarly valuable assets may be competing for two lineup spots. This is lineup ambiguity / Scoring Depth / Lineup Capture territory.
-- QB1 + QB1 + deeply contingent QB: the third QB is much more plausibly Non-Scoring optionality.
-- QB15 + QB18 + QB22: do not classify QB22 as Non-Scoring merely because he is the third QB. Similar assets may all belong to the competitive scoring layer.
+The three fluid roster states remain useful as operational language, but they are no longer the object that must be perfectly classified first.
 
-Canonical principle:
+1. **STARTER** — normal productive lineup core.
+2. **SCORING DEPTH** — additional rostered production that still has a meaningful path to material lineup impact.
+3. **NON-SCORING OPTIONALITY** — roster capacity below/outside normal material production, justified primarily by the possibility of a meaningful state change.
 
-**relative economic quality + eligible slots + competition + expected use → functional roster state**
+Preferred research sequence:
 
-not:
+**WoRP distribution → Material Production Cutline → lineup/slot demand → useful scoring depth → remaining roster capacity becomes optionality → diagnose roster against that structure.**
 
-**player name/rank → fixed state**
+Do not derive a perfect Starter/Scoring/Non-Scoring classifier before answering the simpler economic question.
 
-Slot eligibility ultimately matters more than traditional slot names. FLEX is shared RB/WR/TE demand; Superflex is shared QB/RB/WR/TE eligibility.
+## Optionality and roster-spot recycling
 
-## Current WR hypothesis
+Asset valuation is OUT OF SCOPE.
 
-The working hypothesis is intentionally product-oriented rather than a demand for an exact mathematical threshold.
+The only value-generation concept required is:
 
-WR may deserve substantial roster capital in the **Scoring** layer because leagues can demand many WR/FLEX starters and useful lineup coverage.
+> When a Non-Scoring player changes into a meaningfully higher sporting state, the manager gains capacity to act. The player can be promoted, retained, traded, consolidated in a 2-for-1, or otherwise moved; if that action frees a roster spot, the manager can make another optionality bet.
 
-But WR may lose relative attractiveness once the roster reaches the **Non-Scoring** layer. The question is not whether a deep WR can ever emerge; it is whether that Non-Scoring roster spot has better optionality elsewhere.
+The model does NOT need to know the trade price or quantify market appreciation.
 
-Structural reasons being investigated:
-1. A deep RB can sometimes receive a concentrated workload from one state change ahead of him.
-2. A backup QB can become an NFL starter, especially valuable in formats with QB-eligible demand.
-3. Deep WR opportunity often does not transfer as mechanically after one player ahead disappears; target redistribution can be diffuse.
-4. WR has meaningful produced-vs-captured WoRP friction: a WR can produce useful value while still being benched because of lineup ambiguity.
-5. Deep WR economics are compressed in the tail; many deep WR assets can be economically similar.
-6. Therefore a purely Non-Scoring WR should face a higher **optionality hurdle rate** than a WR who still provides meaningful Scoring Depth.
+What matters for roster construction is the efficiency of Non-Scoring capacity:
 
-Do NOT translate this into an arbitrary universal WR rank cutoff. The desired product output is closer to an economically meaningful **cut zone / hurdle** that changes with league format.
+- probability of meaningful state change;
+- magnitude of sporting impact after the change;
+- persistence of the new state;
+- speed/time to meaningful state change;
+- ability to recycle the roster spot into another bet after promotion/action.
 
-## What the product eventually needs
+### Clogger
 
-For each position and league format, estimate:
+A **clogger** is a Non-Scoring roster asset that consumes roster capacity for too long without generating a meaningful state change.
 
-**How far should the manager buy Scoring Depth, and after what region should additional roster capacity primarily be allocated for Optionality?**
+Therefore optionality should not be judged merely by number of small positive outcomes. The research should care about **large transitions and roster-time consumed to generate them**.
 
-This can produce guidance like:
-- position X still adds useful lineup/scoring depth here;
-- additional position X exposure beyond this region has declining lineup utility;
-- Non-Scoring capacity should now prioritize assets with stronger asymmetric state-change paths.
+## Sporting impact only
 
-Precision should be sufficient for roster decisions, not optimized for its own sake.
+WoRP measures sporting value.
 
-## Research completed before the current pause
+Do NOT add an Asset Value layer to this project.
+Do NOT research trade prices, picks, ADP, market appreciation, or dynasty market valuation unless the product scope is explicitly changed later.
 
-### Promotion Event / Episode work
+A state change matters because it creates sporting usefulness and managerial capacity; the app does not need to price the resulting transaction.
 
-V0.1–V0.3.1 established an empirical object for low-use-to-active transitions.
+## Sleeper readonly — role and limitation
 
-V0.3.1 fixed onset timing by separating trigger week from active start week. All 239 episodes found an active onset after the fix. Promotion episodes remain ex-post utilization/performance shapes, NOT validated historical NFL injury/depth-chart/news events.
+Sleeper readonly is a major empirical source for Roster Construction and Roster Diagnostic.
 
-The research can measure:
-- duration of active episode;
-- positive WoRP produced;
-- positive WoRP captured when actually STARTED;
-- produced-but-not-captured value.
+It can support reconstruction of league settings, roster structure, weekly rosters, starters/bench, and transaction/state changes for accessible leagues/seasons.
 
-### V0.4 — Non-Scoring Exposure Proxy
+This means the existing 2023–2025 Wookiee dataset is an initial sample, NOT a structural ceiling on roster-behavior research.
 
-Script: `wookiee_non_scoring_exposure_audit_v0_4.py`
+However, do not claim a universal multi-league sample before inventorying the league IDs / historical leagues actually accessible to the project. Sleeper provides the infrastructure; sample breadth must be measured.
 
-The audit intentionally calls its state definition a proxy, not a final semantic classifier.
+Use Sleeper primarily after/alongside the WoRP economic cutline work to study:
 
-Primary L5 definition:
-- rostered player-week;
-- at least two prior observations;
-- zero REAL starts in recent lookback;
-- zero ORACLE selections in recent lookback;
-- target-week outcomes excluded from classification.
+- how real rosters allocate depth around the material production region;
+- how often below-cutline players cross into material production;
+- time to state change / clogger behavior;
+- realized lineup capture after state changes;
+- differences by league format, roster size, scoring, and slot eligibility.
 
-Primary results:
-- 5,162 proxy exposure player-weeks;
-- 144 promotion-episode triggers;
-- 2.7896% descriptive promotion-trigger rate per exposure-week;
-- 144/239 V0.3.1 episodes matched the primary proxy.
+## Historical WoRP advantage
 
-Position results, L5:
-- QB: 1,319 exposures; 32 triggers; 2.43%; produced WoRP / 100 exposure weeks 0.6400; captured 0.2924.
-- RB: 1,447; 40; 2.76%; produced 0.3780; captured 0.0881.
-- TE: 500; 13; 2.60%; produced 0.3146; captured 0.0020.
-- WR: 1,896; 59; 3.11%; produced 0.3848; captured 0.1289.
+Local project inventory confirms WoRP data covering 2016–2025, including weekly WoRP, rankings, normalized data, relevant universe, band sensitivity, and tier-by-season outputs.
 
-Sensitivity was reasonably stable across 3/5/8-week lookbacks:
-- QB: 2.40% / 2.43% / 2.47%
-- RB: 2.88% / 2.76% / 2.41%
-- TE: 2.19% / 2.60% / 2.60%
-- WR: 3.28% / 3.11% / 3.04%
+Therefore the first Material Production Cutline study does NOT require Sleeper roster history.
 
-Interpretation: useful evidence that the transition phenomenon survives reasonable lookback changes. These are still proxy rates, not true probabilities of semantic Non-Scoring assets promoting.
+Use the 2016–2025 WoRP history first to answer:
 
-Important emerging observation: produced WoRP and captured WoRP differ materially. Do not rank optionality by raw produced WoRP alone.
+> **At what positional depth does WoRP stop producing material winning impact with enough consistency and cross-season repeatability to treat deeper normal production as economic zero?**
 
-TE's extremely low captured WoRP in the small promoted sample is an audit flag, not a product conclusion.
+Sleeper then becomes the behavioral/roster layer used to translate that economic frontier into construction and diagnostic guidance.
 
-## V0.5 / V0.5.1 — exploratory path now FROZEN
+## Primary cutline tests
 
-`wookiee_promotion_roster_context_audit_v0_5.py` attempted to classify promotion context using same-position stronger-player counts versus observed position capacity.
+For each position/rank region, evaluate three things first:
 
-It produced 131/144 events in a "competition" bucket and only 13 in a "room" bucket. This binary construction was too coarse and did not reliably express the QB1 + QB1 + QB1 concept.
+1. **Magnitude** — is the WoRP large enough to matter?
+2. **Consistency** — does material impact occur often enough rather than depending on isolated spikes?
+3. **Repeatability** — does the economically relevant region recur across seasons rather than being a one-year artifact?
 
-A V0.5.1 script was then created to explore continuous distance to the roster's observed capacity frontier. **Do not continue tuning this path by inertia.** The research direction was corrected before treating V0.5.1 as the next canonical step.
+Do not force a universal exact rank if evidence supports a transition zone instead.
 
-Decision:
-- V0.5 and V0.5.1 are exploratory artifacts.
-- They are not validated roster-state models.
-- Do not use them for frontend/product claims.
-- Do not resume endless threshold/frontier refinement unless a later product question specifically requires it.
+Do not define 'material' by choosing a threshold that favors a position. Use distributional evidence and decision-scale sensitivity, then look for a robust zone where the roster decision changes.
 
-## Why the direction changed
+## Relationship to previous big-impact research
 
-The research briefly became too focused on deriving mathematically perfect Starter / Scoring / Non-Scoring classifications.
+V0.7 and V0.7.1 remain valid evidence, but the prior attempt to broaden the 2023–2025 Non-Scoring proxy historically is PAUSED.
 
-That is not necessary for the product.
+Validated V0.7/V0.7.1 finding at the pre-specified >=0.50 WoRP / next-four-complete-weeks replication hurdle:
+- QB showed material-tail hits in all 3 observed seasons.
+- RB showed rare material hits in 2/3 seasons.
+- WR showed zero >=0.50 four-week post-shock sporting hits in all 3 seasons despite the largest exposure pool.
+- TE remained unresolved/sparse.
 
-The three-state framework can be an operational roster-construction heuristic. The product needs a recommended allocation and useful drift alerts when player states change. It does not need to prove that a specific player has a mathematically exact state score.
+This is useful optionality evidence, not the next research priority.
 
-This is the canonical correction of course.
+Do not spend time tuning 0.50 vs nearby thresholds or extending the old proxy by inertia.
 
-## NEXT STEP WHEN RESUMING
+The next research priority is the simpler and more fundamental **Material Production Cutline** using 2016–2025 WoRP history.
 
-Begin **Roster Construction Model V0.1**.
+## Roster Diagnostic — second priority
 
-Do NOT resume V0.5 threshold tuning first.
+Once a decision-useful construction model exists, diagnose a user's actual roster against it.
 
-Research question:
+The diagnostic should eventually answer questions such as:
+- Is the roster underweight in materially useful scoring depth?
+- Is too much roster capacity sitting below the material cutline?
+- Are Non-Scoring spots being consumed by slow-changing cloggers?
+- Is the roster carrying optionality in positions/archetypes that rarely generate material state changes?
+- Has a recent promotion/state change altered the optimal roster mix?
 
-> **For each position and league format, how far should the manager buy Scoring Depth, and from what economic region should additional roster capacity primarily be evaluated as Optionality?**
+Do not build the diagnostic before the construction logic is sufficiently validated.
 
-Start with league-format/slot demand and existing WoRP curve evidence, then use Promotion/Produced/Captured evidence as calibration for the optionality hurdle.
+## Frozen / killed / backlog work
 
-The first version does not need a mathematically exact universal boundary. It should seek a decision-useful zone and explicitly represent uncertainty.
+### KILL — Asset Value
+No market-value layer. No trade pricing. No pick valuation. No ADP valuation.
 
-For WR specifically, test the hypothesis that:
-- WR remains important through the Scoring Depth layer;
-- once additional WRs no longer materially improve expected lineup coverage/competition, deep WRs should face a higher optionality hurdle;
-- the relevant cut zone is format-dependent, not a universal WR rank;
-- alternative positions/archetypes can become preferred Non-Scoring capital because of more asymmetric state-change paths.
+### PAUSE — historical extension of the old V0.7 Non-Scoring proxy
+Do not continue merely because it was the previous task. Revisit only if the cutline/construction research creates a specific need.
 
-## Existing methodological guardrails to preserve
+### FREEZE — Structural Insights editorial hotfix loop
+V0.9.1 remains frozen unless a material defect appears.
+
+### LAST BACKLOG — research-to-editor publication bridge
+The automatic bridge from research evidence to Top-5 frontend cards is intentionally deferred. First improve the underlying roster-construction intelligence.
+
+## Current product architecture
+
+Keep the final product compact. Current intended architecture:
+
+**League WoRP Map → What This League Is Telling You → Value Cliffs → Roster Construction → My Roster Diagnostic**
+
+A future player/trade decision layer is not a current priority and must not require market valuation.
+
+The product should answer manager decisions, not expose research machinery.
+
+## Methodological guardrails to preserve
 
 - WoRP captured = WoRP from a player actually in the lineup. Not started = not captured.
 - Produced WoRP ≠ captured WoRP.
-- Market Capture ≠ Lineup Capture.
-- WoRP ≠ trade price.
 - Capturable ≠ captured.
-- Compression ≠ fungibility.
 - FREE ≠ WAIVER.
-- Do not claim WR60/WR72/WR80 is a waiver threshold.
-- Approximate WR economic tail around WR55/60+ is not a universal roster-state cutoff.
+- Compression ≠ fungibility.
 - FLEX/SF are shared eligible-slot demand, not position-owned slots.
-- Oracle/Teto is ex-post usefulness, not ex-ante identifiability.
-- Do not use target-week outcomes to define pre-week state.
-- Do not force waiver cycling as optimal; test it.
-- If a residual technical dispute falls below 4% of the relevant universe, trigger a relevance/STOP discussion before spending more research time.
-- Product output should remain decision-oriented; research complexity belongs in the backoffice.
+- Relative improvement above a low baseline does not automatically equal material impact.
+- Statistical separation does not automatically equal decision materiality.
+- Do not use tiny mean differences as roster-construction evidence.
+- Do not claim WR60/WR72/WR80 or any other rank as a waiver threshold without evidence.
+- A material production cutline is NOT automatically a waiver threshold.
+- Do not force waiver cycling as optimal.
+- Do not force fixed player/rank labels onto fluid roster states.
+- Research should seek large-impact frequency × magnitude × persistence × capture, and for optionality also speed/time-to-state-change.
+- Product precision should be sufficient to change a roster decision, not optimized for its own sake.
 
-## Product context
+## New execution contract
 
-The core WoRP Engine V0.2.1 is frozen. Structural Insights editor V0.9.1 passed its three-league harness and its editorial phase is frozen unless a material defect appears.
+1. Development/research is currently resumed under this hierarchy.
+2. Advance autonomously through research design, diagnosis, reversible methodological choices, code, and direct GitHub commits.
+3. Stop and call the user only when:
+   - the user truly needs to execute something locally / in Terminal; or
+   - a genuine conceptual fork would embed an unapproved assumption into WoRP Lab.
+4. Do not ask for micro-confirmations.
+5. Do not continue an old research branch merely because it is next numerically.
+6. Product question drives research: identify the decision → identify missing evidence → research only that evidence → incorporate if material.
+7. Apply the materiality STOP aggressively. Noise does not earn research time.
+8. GitHub is the source of truth for research contracts/scripts, but local outputs are not automatically synchronized.
+9. Do not claim a script/result is validated until the user runs the required local computation and validation passes.
 
-Current research is intended to improve the intelligence behind roster-construction guidance, not to reopen the engine or the frozen editorial hotfix loop.
+## IMMEDIATE NEXT GOAL
 
-Canonical product philosophy:
+### Material Production Cutline V0.1
 
-**evidence → structural hypothesis → roster-construction story → relevance test → dedupe → high-value actionable insight**
+Use 2016–2025 historical WoRP to identify, for QB/RB/WR/TE, the positional depth/rank region after which normal sporting production ceases to generate material winning impact with sufficient consistency and repeatability.
 
-The product now needs the roster-construction intelligence layer more than another threshold-optimization exercise.
+The study should prioritize robust decision zones over exact arbitrary cutoffs.
 
-## Frontend access workflow — validated 2026-09-14
-
-A local double-click launcher was created for the user:
-
-`Abrir_WoRP_Lab.command`
-
-Expected local repo path:
-
-`~/Downloads/worp/worp_lab_v0_2_1`
-
-Launcher behavior:
-1. enters the local WoRP Lab directory;
-2. runs `git pull --ff-only`;
-3. selects the highest-version local `app_v0_*.py` using version sort;
-4. launches it through Streamlit, preferring `python3.12` when available and falling back to `python3`.
-
-The downloaded `.command` initially lacked executable permission. This was fixed once with:
-
-`chmod +x /Users/jperocco/Downloads/Abrir_WoRP_Lab.command`
-
-After that, double-clicking the launcher successfully opened the frontend.
-
-Operational preference: for normal frontend access, prefer this launcher over making the user navigate through Terminal manually. If a future frontend version is committed and pulled locally, the launcher is designed to select the newest `app_v0_*.py` automatically.
+Only after this economic frontier is understood should the research use Sleeper roster history to calibrate how real roster construction should allocate scoring depth versus Non-Scoring optionality around those frontiers.
