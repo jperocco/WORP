@@ -43,8 +43,6 @@ def main():
     inv=pd.read_csv(IN,dtype={'league_id':str}); inv=inv[inv.status.eq('READY')].copy()
     if a.max_leagues:inv=inv.head(a.max_leagues)
     u=get('/user/'+USERNAME); uid=str(u['user_id']); pm=fetch_player_map()
-    # Player fantasy points depend on scoring settings, not roster slots. Cache by
-    # exact scoring JSON so repeated leagues sharing scoring avoid duplicate load.
     weekly_cache={}; rows=[]; failures=[]
     for i,r in inv.iterrows():
         lid=str(r.league_id)
@@ -54,9 +52,11 @@ def main():
                 w,_=load_sleeper_player_weeks([SEASON],sc,player_map=pm); validate_weekly_contract(w); weekly_cache[sk]=w
             w=weekly_cache[sk]; st=settings(lg)
             ww,ranks=calculate_season_worp(w,st,replacement_band=6,n_sims=a.n_sims,seed=7)
-            # Current-season positional economics: season rank plus realized WoRP to date.
+            # Engine contract: weekly output column is `weekly_worp`; season output
+            # column is `worp`. Aggregate the weekly column here, then attach the
+            # season positional rank returned by the engine.
             agg=(ww[ww.position.isin(POS)].groupby(['player_id','player_name','position'],as_index=False)
-                 .agg(weeks=('week','nunique'),season_worp=('worp','sum'),mean_weekly_worp=('worp','mean')))
+                 .agg(weeks=('week','nunique'),season_worp=('weekly_worp','sum'),mean_weekly_worp=('weekly_worp','mean')))
             rr=ranks[['player_id','position','pos_rank']].drop_duplicates(['player_id','position'])
             agg=agg.merge(rr,on=['player_id','position'],how='left')
             rosters=get('/league/'+lid+'/rosters'); mine=next((x for x in rosters if str(x.get('owner_id'))==uid),None)
