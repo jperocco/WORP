@@ -31,6 +31,12 @@ def parse_positions(x):
     try: return json.loads(x) if pd.notna(x) else []
     except Exception: return []
 
+def as_bool(x):
+    # CSV-safe boolean parsing: bool('False') is True in Python, so never use it here.
+    if isinstance(x, bool): return x
+    if pd.isna(x): return False
+    return str(x).strip().lower() in {'1','true','t','yes','y'}
+
 def nonstarter_count(pos):
     return sum(p in ('BN','IR','TAXI') for p in pos)
 
@@ -45,7 +51,7 @@ def format_key(r):
         f"Start{int(r.starter_count) if pd.notna(r.starter_count) else 'NA'}",
         f"QB{int(r.fixed_qb or 0)}", f"RB{int(r.fixed_rb or 0)}", f"WR{int(r.fixed_wr or 0)}", f"TE{int(r.fixed_te or 0)}",
         f"FLEX{int(r.flex_slots or 0)}", f"SFLEX{int(r.sf_slots or 0)}",
-        'TEP' if bool(r.tep_detected) else 'noTEP'
+        'TEP' if as_bool(r.tep_detected) else 'noTEP'
     ])
 
 positions = df.roster_positions.map(parse_positions)
