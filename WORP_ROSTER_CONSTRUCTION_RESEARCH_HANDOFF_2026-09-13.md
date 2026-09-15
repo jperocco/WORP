@@ -1,7 +1,7 @@
 # WoRP Lab — Roster Construction Research Handoff
 
 Date: 2026-09-15
-Status: ACTIVE — HIERARCHY RESET
+Status: ACTIVE — LEAGUE-NATIVE MARGINAL ROSTER ECONOMICS
 
 ## NON-NEGOTIABLE PRODUCT PRINCIPLE — LEAGUE ADAPTABILITY
 
@@ -13,19 +13,15 @@ Priority zero for every current and future model:
 
 > **The engine and its recommendations must adapt to each league's format, team count, scoring, starting-slot structure/eligibility, roster size, replacement environment, and other economically material league-specific settings.**
 
-This requirement is ABOVE Roster Construction, Roster Diagnostic, and frontend/editor work. If a research result is expressed in raw positional ranks (for example RB35 or WR45), treat that as a historical baseline/diagnostic until it has been translated into league-native economics.
-
-Do not ship universal raw-rank cutlines learned from a reference league or pooled NFL history when league format can materially move the frontier.
-
 The correct architecture is:
 
-**league settings → league-native WoRP/replacement economics → material production frontier → roster construction → roster diagnostic.**
+**league settings → league-native WoRP/replacement economics → marginal WoRP vs capturable alternative → roster construction → roster diagnostic.**
 
-Wookiee remains useful for regression, examples, and deep behavioral audits. It must never silently become the assumed league format.
+Raw positional ranks are historical/diagnostic evidence only until translated into league-native economics. Wookiee remains useful for regression and behavioral audits but must never silently become the assumed league format.
 
 ## Product objective
 
-WoRP Lab remains a sporting-performance product. It does NOT model trade prices, picks, ADP, market value, or asset valuation.
+WoRP Lab is a sporting-performance product. It does NOT model trade prices, picks, ADP, market value, or asset valuation.
 
 Current product hierarchy:
 
@@ -33,186 +29,216 @@ Current product hierarchy:
 1. WoRP / league economic map.
 2. What This League Is Telling You.
 3. Value Cliffs.
-4. Roster Construction — primary research priority after adaptability is preserved.
+4. Roster Construction — current research priority.
 5. Roster Diagnostic — next product layer after construction logic is sufficiently validated.
-6. Research-to-editor automation / Top-5 publication bridge — LAST backlog item, not a current priority.
+6. Research-to-editor automation / Top-5 publication bridge — LAST backlog item.
 
-The main research goal is to turn each league's own economics into a decision-useful answer to:
+## GOVERNING ROSTER-CONSTRUCTION PRINCIPLE — MARGINAL WoRP, NOT ABSOLUTE HURDLES
 
-> **In THIS league, how deep at each position does sporting production remain materially capable of helping win, with enough consistency and repeatability to matter?**
+Do **not** treat 0.25, 0.50, 0.75, or any other WoRP landmark as an absolute roster-construction threshold. Those values are sensitivity probes into the curve, not semantic definitions of materiality.
 
-The product should prefer simple, decision-material boundaries/zones over mathematically elaborate state classifiers.
+The relevant roster-construction question is the **delta between production that must be secured and production that can realistically be obtained deeper in the league's player pool**.
 
-## New primary abstraction — Material Production Cutline
+Canonical example from the product discussion:
 
-Roster Construction should first seek the positional region where WoRP stops being materially relevant to winning.
+> If WR28 produces 0.25 WoRP and a realistically capturable WR110-level alternative produces 0.15 WoRP, the roster-construction advantage of securing WR28 is not 0.25 WoRP. The relevant marginal advantage is approximately 0.10 WoRP, subject to frequency, identification, timing, and capture.
 
-For each position **under the target league's economics**, ask:
-- Where is WoRP magnitude still large enough to matter?
-- How consistently does that impact occur?
-- How repeatable is the result across seasons?
-- At what economic depth does the distribution effectively become zero for normal winning production?
+Conversely, if a high-end player produces 1.50 WoRP and the realistic deep alternative produces 0.15, the large marginal delta is structurally difficult to replace and should matter greatly to roster construction.
 
-Raw historical rank questions such as RB35 or WR45 are useful discovery tools, not universal product answers.
+Therefore the primary question becomes:
 
-**Economic zero does not mean mathematical WoRP = 0.000.** It means remaining differences are too small, too rare, or too unstable to plausibly change roster construction, weekly outcomes, or season-winning decisions.
+> **In THIS league and position, at what point does the marginal WoRP gained by securing additional rostered production converge toward the WoRP realistically capturable from deeper alternatives?**
 
-## Governing materiality principle
+When that delta becomes decision-immaterial, additional scoring depth may cease to buy meaningful competitive advantage even if both players still have positive absolute WoRP.
 
-Optimize research for large, decision-material impacts. Small differences such as 0.061 vs 0.045 WoRP are operationally zero vs zero unless there is evidence that they compound into a material weekly/season effect.
+This is the rigorous form of the earlier `WR1* + WR1* + waiver` provocation. It is a hypothesis to test, NOT a proven roster recipe and NOT a literal instruction to roster only two WRs.
+
+### What must be measured together
+
+For each league/position/economic region:
+1. WoRP produced by the secured/higher region.
+2. WoRP available in deeper alternatives.
+3. **Marginal WoRP delta** between them.
+4. Frequency/density of deep alternatives capable of producing the relevant impact.
+5. Whether those alternatives are actually FREE/available at the relevant time.
+6. Whether they are **ex-ante identifiable and capturable before the production occurs**.
+7. Persistence and lineup capture once acquired.
+
+A deep player producing 0.15 in hindsight is not automatically a substitute for a rostered 0.25 player. There must be enough alternative supply and enough ex-ante capturability for the substitution to be economically real.
+
+## Materiality principle
+
+Optimize research for decision-material deltas, not mathematically nonzero production. Small differences such as 0.061 vs 0.045 WoRP are operationally zero vs zero unless evidence shows they compound into meaningful weekly/season impact.
 
 Before spending research time on a difference, ask:
-> **Could this plausibly change how a manager builds a roster, sets a lineup, or wins meaningful weeks/seasons?**
 
-If no, classify it as noise and STOP. Do not optimize thresholds by tiny increments. Seek robust zones where the decision changes. If a residual technical dispute affects less than 4% of the relevant universe and cannot change the decision, trigger STOP.
+> **Could this marginal difference plausibly change how a manager builds a roster, sets a lineup, or wins meaningful weeks/seasons?**
 
-## Roster Construction — simplified hierarchy
+If no, classify it as noise and STOP. Do not optimize thresholds by tiny increments. If a residual technical dispute affects less than 4% of the relevant universe and cannot change the decision, trigger STOP.
 
-The three fluid roster states remain useful operational language, but they are no longer the object that must be perfectly classified first.
+**Economic zero is a delta concept, not necessarily absolute WoRP = 0.000.** A player can have positive WoRP while the advantage of securing that player over a realistic alternative is economically zero.
+
+## Roster Construction — simplified states
 
 1. **STARTER** — normal productive lineup core.
-2. **SCORING DEPTH** — additional rostered production that still has a meaningful path to material lineup impact.
-3. **NON-SCORING OPTIONALITY** — roster capacity below/outside normal material production, justified primarily by meaningful state-change opportunity.
+2. **SCORING DEPTH** — additional rostered production whose marginal advantage over realistic alternatives remains materially useful.
+3. **NON-SCORING OPTIONALITY** — roster capacity where securing ordinary scoring production no longer buys enough marginal advantage; justified primarily by meaningful state-change opportunity.
 
 Preferred sequence:
 
-**league-native WoRP distribution → Material Production Cutline → eligible lineup demand → useful scoring depth → remaining roster capacity becomes optionality → diagnose roster against that structure.**
+**league-native WoRP distribution → league-native replacement/availability environment → marginal WoRP vs capturable alternatives → useful scoring depth → remaining roster capacity becomes optionality → diagnose roster.**
 
-Do not derive a perfect Starter/Scoring/Non-Scoring classifier before answering the simpler economic question.
+Do not derive a perfect state classifier before answering the economic question.
 
-## Optionality and roster-spot recycling
+## `WR1* + WR1* + waiver` — protocolled hypothesis
 
-Asset valuation is OUT OF SCOPE.
+The historical shorthand is preserved as a research provocation only.
 
-When a Non-Scoring player changes into a meaningfully higher sporting state, the manager gains capacity to act. The player can be promoted, retained, traded, consolidated in a 2-for-1, or otherwise moved; if that action frees a roster spot, the manager can make another optionality bet.
+It means:
 
-The model does NOT need to know the trade price or quantify market appreciation.
+> After securing the WRs that create genuinely large and difficult-to-replace WoRP deltas, does spending additional roster capacity to secure ordinary WR depth buy enough marginal WoRP compared with realistically capturable deep WR alternatives?
 
-What matters for Non-Scoring capacity:
-- probability of meaningful state change;
-- magnitude of sporting impact after the change;
-- persistence of the new state;
-- speed/time to meaningful state change;
-- ability to recycle the roster spot into another bet after promotion/action.
+It does **not** mean:
+- exactly two WRs are always optimal;
+- WR28 is waiver-level;
+- WR110 is always available;
+- any deep WR is fungible with WR28;
+- a hindsight deep hit was ex-ante capturable;
+- the same construction applies across league formats.
 
-### Clogger
+The hypothesis must be league-native and may prove true for WR in some formats, false in others, and different for QB/RB/TE.
 
-A **clogger** is a Non-Scoring roster asset that consumes roster capacity for too long without generating a meaningful state change. Optionality should therefore care about large transitions and roster-time consumed to generate them, not merely the number of small positive outcomes.
+## League-Native Material Production Frontier V0.2 — VALIDATED
 
-## Sporting impact only
+V0.2 tested six materially different environments across 2016–2025 and passed the adaptability sanity checks:
+- 10T 1QB Start8;
+- 12T 1QB Start8;
+- 12T 1QB Start11;
+- 12T SF Start11;
+- 12T SF 2TE/TEP Start11;
+- 14T SF Start10.
 
-Do NOT add an Asset Value layer. Do NOT research trade prices, picks, ADP, market appreciation, or dynasty market valuation unless product scope is explicitly changed later.
+The frontier moved materially with team count, starting depth, Superflex, and 2TE/TEP. Shared-slot competition also moved RB/WR/TE economics rather than preserving Wookiee-fixed positional ranks.
 
-## Sleeper readonly — role and limitation
+Examples at the 0.50 sensitivity landmark:
+- QB: 12T 1QB Start8 QB10 → 12T SF Start11 QB34.
+- TE: 12T SF Start11 TE14.5 → 12T SF 2TE/TEP Start11 TE25.
+- WR: 10T 1QB Start8 WR30 → 12T 1QB Start11 WR58.
 
-Sleeper readonly is a major empirical source for Roster Construction and Roster Diagnostic. It can support reconstruction of league settings, roster structure, weekly rosters, starters/bench, and transaction/state changes for accessible leagues/seasons.
+Conclusion: **league adaptability passed as a structural prerequisite.** Raw rank cutlines must still never be universalized.
 
-The existing 2023–2025 Wookiee dataset is an initial behavioral sample, NOT a structural ceiling and NOT the assumed target league.
+## Roster Construction Frontier V0.3 — VALID DIAGNOSTIC, NOT A DECISION RULE
 
-Before generalizing behavior, inventory the league IDs / historical leagues actually accessible to the project. Use diversity of formats deliberately: team count, roster size, scoring, 1QB/SF, TE premium, number and eligibility of FLEX-type slots, etc.
+V0.3 compares each sensitivity-landmark frontier with that league's effective aggregate replacement rank. It is useful for describing how far material production extends above/below replacement.
 
-Use Sleeper to study how real rosters allocate depth around **their league-native material production frontier**, how often below-frontier players cross it, time to state change/clogger behavior, realized lineup capture, and differences by format.
+However, its 0.25/0.50/0.75 landmarks must NOT be promoted into absolute roster thresholds. The V0.3 outputs are curve probes and diagnostic evidence only.
 
-## Historical WoRP advantage and V0.1 status
+At 0.50, examples of material reserve versus replacement were:
+- 12T 1QB Start8: QB -5.5, RB -0.5, TE -6.0, WR -4.5.
+- 12T SF Start11: QB +6.5, RB +1.0, TE -8.0, WR -6.0.
+- 14T SF Start10: QB +9.0, RB +1.0, TE -6.5, WR -4.5.
 
-Historical WoRP data cover 2016–2025. Material Production Cutline V0.1 has now been run successfully and is **VALIDATED AS A FORMAT-AGNOSTIC HISTORICAL BASELINE ONLY**.
+Do not interpret these as exact roster counts. The next research layer must compare **marginal WoRP against realistic deep/capturable alternatives**.
 
-It found stable cross-season raw-rank decay regions, including:
-- QB: strong material production through roughly low/mid QB30s; rapid decay across QB36–45; near-zero around QB46–50+.
-- RB: strong material production through roughly RB35; transition across roughly RB36–50; small/no normal impact deeper in the tail.
-- WR: strong material production extends deeper, through roughly WR40–50 depending materiality hurdle; transition through roughly WR51–65; tail approaches economic zero later.
-- TE: strong material production through roughly TE25–30; transition roughly TE31–40; near-zero deeper.
+## Historical WoRP evidence
 
-These are **NOT universal roster cutlines**. They are evidence that the material-frontier concept is empirically visible and cross-season repeatable in the historical WoRP distribution.
-
-The next research step must test/adapt these frontiers under league-specific replacement and eligible-slot economics before they can become product recommendations.
-
-## V0.1 evidence — 2016–2025
-
-Five-rank cross-season bands show strong repeatability. Selected landmarks:
-- QB31–35 median season-band WoRP 0.581; QB36–40 0.352; QB41–45 0.109; QB46–50 0.023.
+Historical WoRP covers 2016–2025. V0.1 remains a format-agnostic baseline demonstrating repeatable decay/compression zones. Examples:
+- QB31–35 0.581; QB36–40 0.352; QB41–45 0.109; QB46–50 0.023.
 - RB31–35 0.611; RB36–40 0.481; RB41–45 0.347; RB46–50 0.216; RB51–55 0.130; RB56–60 0.047.
 - WR31–35 0.761; WR36–40 0.601; WR41–45 0.499; WR46–50 0.410; WR51–55 0.318; WR56–60 0.245; WR61–65 0.170; WR71–75 0.044.
 - TE21–25 0.644; TE26–30 0.421; TE31–35 0.281; TE36–40 0.168; TE41–45 0.065.
 
-At the 0.50 season-WoRP descriptive landmark, last ranks across 2016–25 were:
-- QB: 30–36.
-- RB: 32–39.
-- WR: 40–47.
-- TE: 20–32.
+These are evidence about curve shape, NOT universal roster/waiver cutlines.
 
-This supports transition **zones**, not exact universal ranks.
+## Capturability guardrails
 
-## Primary cutline tests
+Keep these concepts separate:
+- produced WoRP ≠ captured WoRP;
+- FREE ≠ WAIVER;
+- capturable ≠ captured;
+- hindsight production ≠ ex-ante identifiability;
+- compression ≠ fungibility;
+- replacement ≠ availability;
+- a deep alternative is economically substitutable only if its impact is sufficiently frequent, available, identifiable, and capturable at the relevant time.
 
-For each position/economic region evaluate:
-1. **Magnitude** — WoRP large enough to matter?
-2. **Consistency** — occurs often enough rather than isolated spikes?
-3. **Repeatability** — recurs across seasons?
-4. **Adaptability** — does the frontier move correctly when league settings/replacement/slot eligibility change?
+Market Capture = can identify/acquire a FREE player before production.
+Lineup Capture = once rostered, can choose the correct starter(s) ex ante.
+WoRP captured = WoRP from the player actually in lineup. Not started = not captured.
 
-The fourth test is mandatory before productization.
+## Optionality and roster-spot recycling
 
-Do not define materiality by choosing a threshold that favors a position. Use distributional evidence and decision-scale sensitivity, then seek robust zones where roster decisions change.
+Asset valuation remains OUT OF SCOPE.
 
-## Relationship to previous big-impact research
+When a Non-Scoring player changes into a meaningfully higher sporting state, the manager gains capacity to act. If promotion/retention/trade/consolidation frees a roster spot, that spot can be recycled into another optionality bet.
 
-V0.7 and V0.7.1 remain valid optionality evidence. Historical extension of the old 2023–25 Non-Scoring proxy is PAUSED.
+What matters:
+- probability of meaningful state change;
+- magnitude after change;
+- persistence;
+- speed/time to meaningful state change;
+- ability to recycle roster capacity.
 
-At the pre-specified >=0.50 WoRP / next-four-complete-weeks replication hurdle:
-- QB showed material-tail hits in all 3 observed seasons.
-- RB showed rare material hits in 2/3 seasons.
-- WR showed zero >=0.50 four-week post-shock sporting hits in all 3 seasons despite the largest exposure pool.
-- TE remained unresolved/sparse.
+A **clogger** is a Non-Scoring roster asset that consumes roster capacity too long without meaningful state change.
 
-Do not tune 0.50 vs nearby thresholds by inertia.
+## Sleeper readonly — role and limitation
 
-## Roster Diagnostic — second priority
+Sleeper readonly can support league settings, roster structure, weekly rosters, starters/bench, and transactions/state changes for accessible leagues/seasons. Wookiee 2023–2025 is an initial behavioral sample, not a structural ceiling.
 
-Once league-native construction logic exists, diagnose the user's actual roster against it. Eventually answer:
-- Is the roster underweight in materially useful scoring depth for THIS format?
-- Is too much capacity below THIS league's material frontier?
-- Are Non-Scoring spots consumed by slow-changing cloggers?
-- Is optionality concentrated in positions/archetypes that rarely generate material state changes?
-- Has a promotion/state change altered the optimal roster mix?
+Use diverse accessible leagues to study whether deep alternatives are actually rostered/free, how often they become relevant, whether managers could identify/acquire them before production, lineup capture after acquisition, and how all of this changes with format.
 
-## Frozen / killed / backlog work
+Sleeper has no documented endpoint for arbitrary/random league discovery; breadth depends on accessible/discoverable league IDs.
 
-### KILL — Asset Value
-No market-value layer, trade pricing, pick valuation, or ADP valuation.
+## Previous big-impact research
 
-### PAUSE — historical extension of old V0.7 Non-Scoring proxy
-Revisit only if league-native cutline/construction research creates a specific need.
+V0.7/V0.7.1 remain valid optionality evidence, not absolute roster cutline evidence. The pre-specified >=0.50 next-four-complete-weeks hurdle was a replication test landmark, not a universal materiality definition.
 
-### FREEZE — Structural Insights editorial hotfix loop
-V0.9.1 remains frozen unless a material defect appears.
+Key 2023–2025 evidence:
+- QB material-tail hits recurred all 3 seasons.
+- RB rare material hits appeared 2/3 seasons.
+- WR had zero >=0.50 four-week post-shock hits despite the largest exposure pool.
+- TE remained sparse/unresolved.
 
-### LAST BACKLOG — research-to-editor publication bridge
-Deferred until underlying league-native roster-construction intelligence is stronger.
+Historical extension of the old Non-Scoring proxy remains PAUSED unless the marginal/capturability question creates a specific need.
+
+## Roster Diagnostic
+
+Once league-native construction logic exists, diagnose the user's roster against it:
+- Is the roster securing genuinely difficult-to-replace WoRP?
+- Is roster capacity being spent on players whose marginal advantage over capturable alternatives is negligible?
+- Is optionality concentrated in positions/archetypes capable of large state changes?
+- Are slow-changing cloggers consuming capacity?
+- Has a state change altered the optimal roster mix?
+
+## Frozen / killed / backlog
+
+- **KILL — Asset Value:** no market-value layer, trade pricing, pick valuation, or ADP valuation.
+- **PAUSE — historical extension of old Non-Scoring proxy:** only reopen for a specific marginal/capturability need.
+- **FREEZE — Structural Insights editorial hotfix loop:** V0.9.1 frozen unless material defect.
+- **LAST BACKLOG — research-to-editor publication bridge.**
 
 ## Current product architecture
 
 **League Settings → League-native WoRP Map → What This League Is Telling You → Value Cliffs → Roster Construction → My Roster Diagnostic**
 
-The product should answer manager decisions, not expose research machinery.
+Value Cliffs and Roster Construction now share an economic intuition: what matters is not merely positive production but the **marginal advantage over the next realistically obtainable alternative**.
 
 ## Methodological guardrails
 
-- **Never universalize Wookiee. Adaptability is priority zero.**
-- WoRP captured = WoRP from a player actually in lineup. Not started = not captured.
-- Produced WoRP ≠ captured WoRP.
-- Capturable ≠ captured.
-- FREE ≠ WAIVER.
+- Never universalize Wookiee.
+- Never turn 0.25/0.50/0.75 into absolute roster thresholds by inertia.
+- Analyze deltas and curve shape.
+- Raw rank cutline ≠ league-native frontier ≠ waiver threshold.
+- FLEX/SF are shared eligible-slot demand.
 - Compression ≠ fungibility.
-- FLEX/SF are shared eligible-slot demand, not position-owned slots.
-- Relative improvement above low baseline does not automatically equal material impact.
-- Statistical separation does not automatically equal decision materiality.
-- Do not use tiny mean differences as roster-construction evidence.
-- Raw rank cutline ≠ universal league-native cutline ≠ waiver threshold.
-- Do not force waiver cycling as optimal.
-- Do not force fixed player/rank labels onto fluid states.
-- Seek large-impact frequency × magnitude × persistence × capture; for optionality also speed/time-to-state-change.
-- Product precision should be sufficient to change a roster decision, not optimized for its own sake.
+- FREE ≠ WAIVER.
+- Capturable ≠ captured.
+- Produced ≠ captured.
+- Ex-ante identification is required for a deep alternative to count as practically substitutable.
+- Relative improvement above a low baseline is not automatically material.
+- Statistical separation is not automatically decision materiality.
+- Small marginal WoRP differences are noise unless they change decisions/outcomes.
+- Optionality = large-impact frequency × magnitude × persistence × capture × speed/time-to-state-change.
+- Product precision should stop when additional precision cannot change a roster decision.
 
 ## Execution contract
 
@@ -223,23 +249,24 @@ The product should answer manager decisions, not expose research machinery.
 5. Apply materiality STOP aggressively.
 6. GitHub is source of truth for research contracts/scripts; local outputs are not automatically synchronized.
 7. Do not claim a script/result is validated until required local computation passes.
-8. **Every roster-construction result must pass a league-adaptability test before becoming product logic.**
+8. Every roster-construction result must pass league-adaptability before becoming product logic.
 
 ## IMMEDIATE NEXT GOAL
 
-### League-Native Material Production Frontier V0.2
+### League-Native Marginal WoRP / Capturable Alternative Curve
 
-Take the validated 2016–2025 raw historical cutline evidence and determine how the material production frontier transforms under materially different league formats.
+Build the next research layer around this question:
 
-The V0.2 research must explicitly vary or ingest:
-- team count;
-- scoring settings relevant to positional economics;
-- starting-slot count and eligibility, including FLEX/SF shared demand;
-- replacement environment;
-- roster size where it affects practical depth/availability.
+> **For each league and position, how much WoRP is actually gained by securing progressively deeper rostered production compared with the best realistically available, ex-ante identifiable, capturable alternative?**
 
-Use Wookiee only as one regression/reference case. Include materially different league configurations so the test can answer:
+Research sequence:
+1. Preserve V0.2/V0.3 as economic-curve diagnostics.
+2. Define league-native deeper alternative pools from actual roster/availability states where possible, not arbitrary universal rank thresholds.
+3. Measure marginal WoRP deltas from secured regions to those alternatives.
+4. Measure density/frequency of alternatives capable of supplying similar production.
+5. Apply timing and ex-ante capturability constraints.
+6. Test persistence and lineup capture.
+7. Identify robust zones where the marginal advantage of additional ordinary scoring depth becomes decision-immaterial.
+8. Only then translate the result into Roster Construction recommendations and revisit the `WR1* + WR1* + waiver` hypothesis by format.
 
-> **Does WoRP correctly move the QB/RB/WR/TE material frontier when the league itself changes?**
-
-Only after this passes should raw historical rank regions become Roster Construction recommendations.
+Do NOT begin by choosing an absolute WoRP threshold. The target is the **marginal curve relative to realistic alternatives**.
