@@ -34,8 +34,6 @@ def main():
     for (lid,name,fmt),r in live.groupby(['league_id','league_name','format_key'],sort=True):
         ee=env[env.format_key.eq(fmt)].copy()
         if ee.empty: continue
-        # Current realized ordering is league-native. Ties are stable but not
-        # interpreted as meaningful separation.
         rr=r.sort_values(['season_worp','mean_weekly_worp','pos_rank'],ascending=[False,False,True],kind='mergesort')
         for _,e in ee.sort_values('scoring_total').iterrows():
             total=int(e.scoring_total)
@@ -68,11 +66,15 @@ def main():
     sumrows=[]
     for (lid,name,fmt),g in o.groupby(['league_id','league_name','format_key'],sort=True):
         good=g[g.composition_state.eq('INSIDE_DECISION_EQUIVALENT_ENVELOPE')]
+        # `DataFrame.flags` is a pandas metadata attribute, so column access must
+        # use brackets here. Attribute access silently resolves to pandas Flags.
+        flag_values=g['flags'].fillna('')
+        flags_seen=';'.join(sorted(set(x for z in flag_values for x in str(z).split(';') if x)))
         sumrows.append({'league_id':lid,'league_name':name,'format_key':fmt,
             'candidate_totals':','.join(map(str,sorted(g.candidate_scoring_total.unique()))),
             'inside_totals':','.join(map(str,sorted(good.candidate_scoring_total.unique()))),
             'diagnostic_state':'HAS_DECISION_EQUIVALENT_CORE' if not good.empty else 'NO_CANDIDATE_CORE_INSIDE_ENVELOPE',
-            'flags_seen':';'.join(sorted(set(x for z in g.flags.fillna('') for x in str(z).split(';') if x)))})
+            'flags_seen':flags_seen})
     s=pd.DataFrame(sumrows); s.to_csv(OUT_SUM,index=False)
     print('V0.29 LIVE ROSTER SCORING-CORE DIAGNOSTIC')
     print(f'Current rosters diagnosed: {len(s)} | has decision-equivalent core: {(s.diagnostic_state=="HAS_DECISION_EQUIVALENT_CORE").sum()} | none inside: {(s.diagnostic_state=="NO_CANDIDATE_CORE_INSIDE_ENVELOPE").sum()}')
