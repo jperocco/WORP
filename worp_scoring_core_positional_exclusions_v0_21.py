@@ -43,8 +43,11 @@ def main():
     pair_rows=[]; fam_rows=[]; env_rows=[]
 
     for (fmt,total),g in d.groupby(['format_key','scoring_total'],sort=True):
-        fams=sorted(g.family.unique())
-        by={f:g[g.family.eq(f)].set_index('ls') for f in fams}
+        # Series.eq(tuple) is interpreted by pandas as elementwise comparison
+        # against a tuple-like sequence and raises a length mismatch. Build the
+        # family mask explicitly so each cell's tuple is compared as one scalar.
+        fams=sorted(set(g['family'].tolist()))
+        by={f:g[g['family'].map(lambda x, target=f: x == target)].set_index('ls') for f in fams}
         # Pairwise comparisons use only the exact intersection for that pair.
         for a,b in combinations(fams,2):
             common=sorted(set(by[a].index)&set(by[b].index))
