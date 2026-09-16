@@ -5,6 +5,7 @@ import pandas as pd
 from worp_roster_construction_product_v0_9_4 import (
     recover_v0_32_ranges,
     roster_construction_envelope,
+    whole_roster_layers,
 )
 
 
@@ -136,6 +137,22 @@ class RosterConstructionProductTests(unittest.TestCase):
         self.assertEqual(
             result["decision_equivalence"], "V0.24_ABS_050_PROTECTION_090"
         )
+
+    def test_bench_size_changes_optionality_not_scoring_core(self):
+        envelope = {"scoring_core_low": 14, "scoring_core_high": 16}
+        five_bench = whole_roster_layers(envelope, active_roster_size=16, superflex=1)
+        twelve_bench = whole_roster_layers(envelope, active_roster_size=23, superflex=1)
+        self.assertEqual((five_bench["optionality_low"], five_bench["optionality_high"]), (0, 2))
+        self.assertEqual((twelve_bench["optionality_low"], twelve_bench["optionality_high"]), (7, 9))
+        self.assertEqual(five_bench["primary_optionality"], ("QB", "RB"))
+
+    def test_one_qb_moves_qb_to_secondary_optionality(self):
+        envelope = {"scoring_core_low": 11, "scoring_core_high": 13}
+        layers = whole_roster_layers(envelope, active_roster_size=20, superflex=0)
+        self.assertEqual(layers["primary_optionality"], ("RB",))
+        self.assertEqual(layers["secondary_optionality"], ("QB",))
+        self.assertEqual(layers["deprioritized_optionality"], ("WR",))
+        self.assertEqual(layers["unresolved_optionality"], ("TE",))
 
 
 if __name__ == "__main__":
