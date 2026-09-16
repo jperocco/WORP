@@ -266,3 +266,39 @@ def roster_construction_envelope(
     )
     result["format_key"] = key
     return result
+
+
+def whole_roster_layers(envelope, active_roster_size, superflex):
+    """Account for the complete active roster without inventing exact quotas.
+
+    V0.7/V0.7.1 support directional optionality priority only: QB material-tail
+    hits recurred in 3/3 seasons, RB in 2/3, WR produced zero >=.50 hits, and TE
+    remained unresolved. Format changes how that direction is presented: SF
+    makes QB optionality primary; in 1QB, RB is primary and QB is secondary.
+    """
+    active_roster_size = int(active_roster_size)
+    scoring_low = int(envelope["scoring_core_low"])
+    scoring_high = int(envelope["scoring_core_high"])
+    if active_roster_size < scoring_high:
+        raise ValueError("Active roster cannot be smaller than the Scoring Core.")
+
+    optionality_low = active_roster_size - scoring_high
+    optionality_high = active_roster_size - scoring_low
+    is_sf = int(superflex) > 0
+    return {
+        "active_roster_size": active_roster_size,
+        "scoring_core_low": scoring_low,
+        "scoring_core_high": scoring_high,
+        "optionality_low": optionality_low,
+        "optionality_high": optionality_high,
+        "primary_optionality": ("QB", "RB") if is_sf else ("RB",),
+        "secondary_optionality": () if is_sf else ("QB",),
+        "deprioritized_optionality": ("WR",),
+        "unresolved_optionality": ("TE",),
+        "evidence": {
+            "QB": "material hits in 3/3 seasons",
+            "RB": "material hits in 2/3 seasons",
+            "WR": "zero >=0.50 four-week hits",
+            "TE": "sparse / unresolved",
+        },
+    }
