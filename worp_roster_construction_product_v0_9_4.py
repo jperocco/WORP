@@ -17,6 +17,48 @@ import pandas as pd
 POSITIONS = ("QB", "RB", "WR", "TE")
 
 
+def recover_v0_32_ranges(product_ranges=None, v0_24_envelopes=None):
+    """Return V0.32 ranges, rebuilding them from local V0.24 when necessary.
+
+    Research CSVs were intentionally local outputs and were not committed with
+    the scripts. A user's established WoRP workspace may therefore contain the
+    populated V0.24 envelope but an absent or header-only V0.32 product file.
+    This applies the frozen V0.32 aggregation exactly; it does not recompute or
+    approximate the underlying research.
+    """
+    if product_ranges is not None and not product_ranges.empty:
+        return product_ranges.copy()
+    if v0_24_envelopes is None or v0_24_envelopes.empty:
+        return pd.DataFrame()
+
+    required = {"format_key", "scoring_total"}
+    for p in POSITIONS:
+        required.update({f"{p}_low_050", f"{p}_high_050"})
+    missing = required - set(v0_24_envelopes.columns)
+    if missing:
+        raise ValueError(f"V0.24 envelope missing columns: {sorted(missing)}")
+
+    rows = []
+    for fmt, group in v0_24_envelopes.groupby("format_key", sort=True):
+        totals = pd.to_numeric(group["scoring_total"], errors="coerce").dropna()
+        if totals.empty:
+            continue
+        row = {
+            "format_key": fmt,
+            "scoring_core_low": int(totals.min()),
+            "scoring_core_high": int(totals.max()),
+        }
+        for p in POSITIONS:
+            lows = pd.to_numeric(group[f"{p}_low_050"], errors="coerce").dropna()
+            highs = pd.to_numeric(group[f"{p}_high_050"], errors="coerce").dropna()
+            if lows.empty or highs.empty:
+                raise ValueError(f"V0.24 envelope has no {p} bounds for {fmt}")
+            row[f"{p}_low"] = int(lows.min())
+            row[f"{p}_high"] = int(highs.max())
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
 def format_key(teams, qb, rb, wr, te, flex, superflex, tep=False):
     start_n = sum(map(int, (qb, rb, wr, te, flex, superflex)))
     return (
@@ -182,4 +224,3 @@ def roster_construction_envelope(
     )
     result["format_key"] = key
     return result
-
