@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from itertools import product
 import math
+from pathlib import Path
 
 import pandas as pd
 
@@ -29,7 +30,10 @@ def recover_v0_32_ranges(product_ranges=None, v0_24_envelopes=None):
     if product_ranges is not None and not product_ranges.empty:
         return product_ranges.copy()
     if v0_24_envelopes is None or v0_24_envelopes.empty:
-        return pd.DataFrame()
+        bundled = Path(__file__).parent / "data" / "worp_scoring_core_decision_equivalence_envelopes_v0_24.csv"
+        if not bundled.exists():
+            return pd.DataFrame()
+        v0_24_envelopes = pd.read_csv(bundled)
 
     required = {"format_key", "scoring_total"}
     for p in POSITIONS:
@@ -61,13 +65,20 @@ def recover_v0_32_ranges(product_ranges=None, v0_24_envelopes=None):
 
 def format_key(teams, qb, rb, wr, te, flex, superflex, tep=False):
     start_n = sum(map(int, (qb, rb, wr, te, flex, superflex)))
-    return (
-        f"{int(teams)}T "
-        + ("SF " if int(superflex) > 0 else "1QB ")
-        + f"Start{start_n} QB{int(qb)} RB{int(rb)} WR{int(wr)} TE{int(te)} "
-        + f"FLEX{int(flex)} SFLEX{int(superflex)}"
-        + (" TEP" if bool(tep) else "")
-    )
+    return "|".join((
+        f"{int(teams)}T", "SF" if int(superflex) > 0 else "1QB",
+        f"Start{start_n}", f"QB{int(qb)}", f"RB{int(rb)}",
+        f"WR{int(wr)}", f"TE{int(te)}", f"FLEX{int(flex)}",
+        f"SFLEX{int(superflex)}", "TEP" if bool(tep) else "noTEP",
+    ))
+
+
+def _canonical_format_key(value):
+    """Accept legacy product labels without changing any format settings."""
+    parts = str(value).replace("|", " ").split()
+    if parts and parts[-1] not in ("TEP", "noTEP"):
+        parts.append("noTEP")
+    return "|".join(parts)
 
 
 def _can_fill(counts, fixed, flex, superflex):
@@ -238,7 +249,9 @@ def roster_construction_envelope(
 ):
     key = format_key(teams, qb, rb, wr, te, flex, superflex, tep=tep)
     if historical_ranges is not None and not historical_ranges.empty:
-        hit = historical_ranges[historical_ranges["format_key"].eq(key)]
+        hit = historical_ranges[
+            historical_ranges["format_key"].map(_canonical_format_key).eq(key)
+        ]
         if not hit.empty:
             row = hit.iloc[0]
             result = {
