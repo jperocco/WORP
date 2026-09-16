@@ -1,7 +1,7 @@
 # WoRP Lab — Product Status and Handoff
 
-Date: 2026-09-15  
-Status: ACTIVE — V0.9.4 PRODUCT INTEGRATION  
+Date: 2026-09-16  
+Status: ACTIVE — V0.9.4.3 PRODUCT VALIDATION  
 Authority: this document records the latest product decisions and supersedes older immediate-next-step notes where they conflict.
 
 ## Canonical version distinction
@@ -88,17 +88,24 @@ The panel must not contain:
 - `fad788d` introduced the intended V0.9.4 direction: visual slot cards based on league-scored fantasy points, without WoRP in the panel.
 - Later `observed lineup economics` changes and the `Filled / Vacant / Vacancy rate` table are a rejected detour and must not be treated as the approved product state.
 
-The V0.9.4 implementation is not frozen until the builder runs successfully and its visual and numerical output is validated.
+Lineup Economics passed visual and numerical validation in V0.9.4.1 and is frozen. FLEX/SF shares below 0.5% are suppressed in V0.9.4.3 so rounded 0% labels are not published.
+
+## Current implementation status
+
+- `app_v0_9_4_3.py` is the launcher-compatible current app.
+- Lineup Economics is frozen after visual and numerical validation.
+- Roster Construction has two product paths: exact historical support and lower-validation league-native derivation.
+- A header-only/missing V0.32 product CSV is recovered in memory from the user's populated local V0.24 envelope using the frozen V0.32 aggregation.
+- If neither populated V0.32 nor V0.24 research output exists locally, the app remains fail-honest and uses only the clearly labeled derived path.
+- Derived-format validation covers 1QB, Superflex, 2TE, active-roster capacity, and non-additive positional bounds.
+- No nearest-format, Wookiee fallback, player-name membership, or new research threshold was introduced.
 
 ## Immediate next steps
 
-1. Restore/fix the V0.9.4 builder so it generates `app_v0_9_4.py` successfully.
-2. Preserve V0.9.3 and the frozen Engine V0.2.1; do not overwrite or reimplement engine mathematics.
-3. Verify each Lineup Economics card uses league-scored fantasy points rather than WoRP.
-4. Validate slot percentages, points/week, total-share coherence, and FLEX/SF composition across materially different leagues.
-5. Freeze Lineup Economics only after visual and numerical validation.
-6. Then implement universal league-native Roster Construction presentation using the two confidence paths above.
-7. Validate Lineup Economics and Roster Construction together in the selected-league UI scope.
+1. Validate one exact-historical league locally so the recovered V0.24 → V0.32 path is observed in the product.
+2. Review derived envelopes across materially different real leagues for decision usefulness, especially overly broad positional bounds.
+3. If those checks pass, freeze Roster Construction product integration.
+4. Move next to the structural, player-free Roster Diagnostic presentation.
 
 ## Execution guardrails
 
