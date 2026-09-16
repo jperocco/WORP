@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 import pandas as pd
 
@@ -42,6 +43,47 @@ def sloped_curve():
 
 
 class RosterConstructionProductTests(unittest.TestCase):
+    def test_clean_install_loads_bundled_research(self):
+        self.assertEqual(len(recover_v0_32_ranges(None, None)), 29)
+
+    def test_all_uploaded_research_formats_reach_historical_path(self):
+        evidence = pd.read_csv(Path(__file__).parent / "data" / (
+            "worp_scoring_core_decision_equivalence_envelopes_v0_24.csv"
+        ))
+        self.assertEqual(len(evidence), 58)
+        historical = recover_v0_32_ranges(None, evidence)
+        self.assertEqual(len(historical), 29)
+        for row in historical.to_dict("records"):
+            tokens = row["format_key"].split("|")
+            counts = [int(tokens[i][len(prefix):]) for i, prefix in
+                      ((3, "QB"), (4, "RB"), (5, "WR"), (6, "TE"),
+                       (7, "FLEX"), (8, "SFLEX"))]
+            with self.subTest(format=row["format_key"]):
+                result = roster_construction_envelope(
+                    pd.DataFrame(), historical, int(tokens[0][:-1]),
+                    *counts, 40, tep=tokens[-1] == "TEP",
+                )
+                self.assertEqual(result["source"], "EXACT_HISTORICAL_SUPPORT")
+                for field in ("scoring_core_low", "scoring_core_high"):
+                    self.assertEqual(result[field], row[field])
+                for position in ("QB", "RB", "WR", "TE"):
+                    for bound in ("low", "high"):
+                        field = f"{position}_{bound}"
+                        self.assertEqual(result[field], row[field])
+
+    def test_uploaded_two_te_format_accounts_for_entire_roster(self):
+        evidence = pd.read_csv(Path(__file__).parent / "data" / (
+            "worp_scoring_core_decision_equivalence_envelopes_v0_24.csv"
+        ))
+        result = roster_construction_envelope(
+            pd.DataFrame(), recover_v0_32_ranges(None, evidence),
+            12, 1, 2, 2, 2, 3, 1, 24, tep=True,
+        )
+        self.assertEqual((result["scoring_core_low"], result["scoring_core_high"]), (15, 16))
+        for capacity, expected in ((16, (0, 1)), (23, (7, 8)), (24, (8, 9)), (25, (9, 10))):
+            layers = whole_roster_layers(result, capacity, 1)
+            self.assertEqual((layers["optionality_low"], layers["optionality_high"]), expected)
+
     def test_header_only_v0_32_recovers_from_local_v0_24(self):
         header_only = pd.DataFrame(columns=["format_key", "scoring_core_low"])
         v24 = pd.DataFrame([
