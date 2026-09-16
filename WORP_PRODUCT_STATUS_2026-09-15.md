@@ -1,7 +1,7 @@
 # WoRP Lab — Product Status and Handoff
 
 Date: 2026-09-16  
-Status: PAUSED SAFELY — V0.9.4.6 CURRENT PRODUCT  
+Status: ACTIVE REVIEW — V0.9.4.6 WITH HISTORICAL EVIDENCE RECOVERY FIX  
 Authority: this document records the latest product decisions and supersedes older immediate-next-step notes where they conflict.
 
 ## Canonical version distinction
@@ -139,3 +139,20 @@ V0.9.4.6 is a presentation-only release. It removes the light-gray backend/metho
 - Do not reopen Roster Construction threshold research without a new decision-material failure.
 - Apply the less-than-4% relevance STOP to residual technical disputes that cannot change a product decision.
 - Keep WoRP and JJ Stats as separate projects and repositories.
+
+## 2026-09-16 — Real V0.24 data recovery and format-key correction
+
+This section supersedes conflicting validation claims and pause instructions above.
+
+- User supplied the original V0.24 CSV: 58 format/total rows, 29 structural formats. It is now tracked under `data/worp_scoring_core_decision_equivalence_envelopes_v0_24.csv`. Keeping it under data avoids a pull collision with the user's previously generated root-level CSV.
+- Concrete integration bug: research uses pipe-separated format keys with explicit TEP/noTEP, while the product generated space-separated keys and omitted noTEP. Matching now uses canonical research keys and accepts legacy product labels.
+- Clean installs recover the frozen V0.32 aggregation from bundled V0.24 evidence when local outputs are absent or empty. Local populated research inputs retain precedence.
+- All 29 real research formats now reach the historical path. Fourteen automated tests pass, including clean-install recovery and whole-roster accounting.
+- For 12T SF Start11 QB1 RB2 WR2 TE2 FLEX3 SFLEX1 TEP, the supplied evidence yields Scoring Core 15–16; QB 2–4, RB 3–5, WR 4–7, TE 2–4. At active roster 24, optionality is 8–9. Positional endpoints are still non-additive.
+- App launcher remains app_v0_9_4_6.py; the imported module and bundled data are updated. No new app build is required. Real local screenshot validation remains pending.
+
+### Remaining methodological limits — do not call the product fully validated
+
+The derived path's sum-of-positional-curves objective is not the legal-lineup Oracle-loss measure tested by V0.23/V0.24. Reusing .05/90% does not establish methodological equivalence. This path is unchanged by this release and still requires correction/review before product freeze. Structural-format matches also do not establish identical full scoring settings. Historical aggregated envelopes do not yet handle every capacity below their historical core high; do not silently clamp positional bounds and call them empirically validated.
+
+Next: validate the recovered historical output in the user's app, then repair remaining translation/capacity cases without inventing optionality quotas or reopening research thresholds. QB/RB directional optionality evidence is preserved; the user-facing technical gray captions remain removed.
