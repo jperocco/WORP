@@ -1,0 +1,185 @@
+"""Product bridge for league-native Roster Construction.
+
+Exact historical envelopes remain authoritative when available. Formats without
+an exact row receive a lower-confidence envelope derived from their own slot
+eligibility, active roster capacity, team count, and league-native WoRP curve.
+No nearest-format substitution is performed.
+"""
+
+from __future__ import annotations
+
+from itertools import product
+import math
+
+import pandas as pd
+
+
+POSITIONS = ("QB", "RB", "WR", "TE")
+
+
+def format_key(teams, qb, rb, wr, te, flex, superflex, tep=False):
+    start_n = sum(map(int, (qb, rb, wr, te, flex, superflex)))
+    return (
+        f"{int(teams)}T "
+        + ("SF " if int(superflex) > 0 else "1QB ")
+        + f"Start{start_n} QB{int(qb)} RB{int(rb)} WR{int(wr)} TE{int(te)} "
+        + f"FLEX{int(flex)} SFLEX{int(superflex)}"
+        + (" TEP" if bool(tep) else "")
+    )
+
+
+def _can_fill(counts, fixed, flex, superflex):
+    if any(counts[p] < fixed[p] for p in POSITIONS):
+        return False
+    remaining = {p: counts[p] - fixed[p] for p in POSITIONS}
+
+    for flex_rb in range(flex + 1):
+        for flex_wr in range(flex - flex_rb + 1):
+            flex_te = flex - flex_rb - flex_wr
+            flex_need = {"RB": flex_rb, "WR": flex_wr, "TE": flex_te}
+            if any(remaining[p] < flex_need[p] for p in ("RB", "WR", "TE")):
+                continue
+            after_flex = remaining.copy()
+            for p in ("RB", "WR", "TE"):
+                after_flex[p] -= flex_need[p]
+            if sum(after_flex.values()) >= superflex:
+                return True
+    return False
+
+
+def _last_positive_rank(curve, position):
+    x = curve[curve["position"].eq(position)].copy()
+    x["position_rank"] = pd.to_numeric(x["position_rank"], errors="coerce")
+    x["three_year_worp_avg"] = pd.to_numeric(
+        x["three_year_worp_avg"], errors="coerce"
+    )
+    x = x[x["position_rank"].notna() & x["three_year_worp_avg"].gt(0)]
+    return int(x["position_rank"].max()) if not x.empty else 0
+
+
+def derive_league_native_envelope(
+    curve,
+    teams,
+    qb,
+    rb,
+    wr,
+    te,
+    flex,
+    superflex,
+    active_roster_size,
+):
+    """Derive a lower-confidence envelope from this league's own economy.
+
+    The V0.19/V0.32 empirical closeout found the broad useful Scoring buffer
+    most often at StartN +3..+5. For a format without exact historical support,
+    that validated band is constrained by this league's own active roster size
+    and positive-WoRP positional supply. Positional ranges are then enumerated
+    jointly under the league's FLEX/SF eligibility; their bounds are non-additive.
+    """
+    required = {"position", "position_rank", "three_year_worp_avg"}
+    missing = required - set(curve.columns)
+    if missing:
+        raise ValueError(f"Roster Construction curve missing columns: {sorted(missing)}")
+
+    teams = int(teams)
+    if teams <= 0:
+        raise ValueError("Roster Construction requires a positive team count.")
+    fixed = {"QB": int(qb), "RB": int(rb), "WR": int(wr), "TE": int(te)}
+    flex, superflex = int(flex), int(superflex)
+    start_n = sum(fixed.values()) + flex + superflex
+    active_roster_size = max(start_n, int(active_roster_size))
+
+    frontier = {p: _last_positive_rank(curve, p) for p in POSITIONS}
+    # The per-roster ceiling is an expectation from league-wide positive-WoRP
+    # supply. Preserve enough headroom to represent every legal starter mix.
+    caps = {
+        p: max(fixed[p], int(math.ceil(frontier[p] / teams)))
+        for p in POSITIONS
+    }
+    caps["QB"] = max(caps["QB"], fixed["QB"] + superflex)
+    for p in ("RB", "WR", "TE"):
+        caps[p] = max(caps[p], fixed[p] + flex + superflex)
+
+    feasible = []
+    ranges = [range(fixed[p], caps[p] + 1) for p in POSITIONS]
+    for values in product(*ranges):
+        counts = dict(zip(POSITIONS, values))
+        total = sum(values)
+        if total > active_roster_size:
+            continue
+        if _can_fill(counts, fixed, flex, superflex):
+            feasible.append((total, counts))
+    if not feasible:
+        raise ValueError("No legal Scoring Core construction for this league format.")
+
+    max_economic_total = max(total for total, _ in feasible)
+    low = min(active_roster_size, start_n + 3, max_economic_total)
+    high = min(active_roster_size, start_n + 5, max_economic_total)
+    low = max(start_n, low)
+    high = max(low, high)
+    selected = [counts for total, counts in feasible if low <= total <= high]
+    if not selected:
+        nearest_total = min(
+            {total for total, _ in feasible}, key=lambda total: abs(total - low)
+        )
+        low = high = nearest_total
+        selected = [counts for total, counts in feasible if total == nearest_total]
+
+    result = {
+        "source": "LEAGUE_NATIVE_DERIVED",
+        "confidence": "LOWER_VALIDATION",
+        "scoring_core_low": int(low),
+        "scoring_core_high": int(high),
+        "format_key": None,
+        "frontier": frontier,
+    }
+    for p in POSITIONS:
+        result[f"{p}_low"] = min(counts[p] for counts in selected)
+        result[f"{p}_high"] = max(counts[p] for counts in selected)
+    return result
+
+
+def roster_construction_envelope(
+    curve,
+    historical_ranges,
+    teams,
+    qb,
+    rb,
+    wr,
+    te,
+    flex,
+    superflex,
+    active_roster_size,
+    tep=False,
+):
+    key = format_key(teams, qb, rb, wr, te, flex, superflex, tep=tep)
+    if historical_ranges is not None and not historical_ranges.empty:
+        hit = historical_ranges[historical_ranges["format_key"].eq(key)]
+        if not hit.empty:
+            row = hit.iloc[0]
+            result = {
+                "source": "EXACT_HISTORICAL_SUPPORT",
+                "confidence": "EMPIRICALLY_VALIDATED",
+                "format_key": key,
+            }
+            for field in ("scoring_core_low", "scoring_core_high"):
+                result[field] = int(row[field])
+            for p in POSITIONS:
+                result[f"{p}_low"] = int(row[f"{p}_low"])
+                result[f"{p}_high"] = int(row[f"{p}_high"])
+            return result
+
+    result = derive_league_native_envelope(
+        curve=curve,
+        teams=teams,
+        qb=qb,
+        rb=rb,
+        wr=wr,
+        te=te,
+        flex=flex,
+        superflex=superflex,
+        active_roster_size=active_roster_size,
+    )
+    result["format_key"] = key
+    return result
+
