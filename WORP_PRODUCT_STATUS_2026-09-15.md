@@ -156,3 +156,13 @@ This section supersedes conflicting validation claims and pause instructions abo
 The derived path's sum-of-positional-curves objective is not the legal-lineup Oracle-loss measure tested by V0.23/V0.24. Reusing .05/90% does not establish methodological equivalence. This path is unchanged by this release and still requires correction/review before product freeze. Structural-format matches also do not establish identical full scoring settings. Historical aggregated envelopes do not yet handle every capacity below their historical core high; do not silently clamp positional bounds and call them empirically validated.
 
 Next: validate the recovered historical output in the user's app, then repair remaining translation/capacity cases without inventing optionality quotas or reopening research thresholds. QB/RB directional optionality evidence is preserved; the user-facing technical gray captions remain removed.
+
+## 2026-09-16 — Optionality allocation investigation completed (reference diagnostic)
+
+- User screenshot confirmed recovered historical display for the 3WR/1TE format: active roster 24, Scoring Core 15–16, QB2–3/RB3–5/WR5–7/TE2–4, optionality8–9. Local visual confirmation for this case is no longer pending.
+- User requested complete numerical positional allocation. The illustrative 5QB/10RB/6WR/3TE proposal was explicitly withdrawn and is not implemented or validated.
+- Ran a new diagnostic using Wookiee 2023–2025 actual Sleeper snapshots and existing native weekly WoRP: 468 roster-week cohorts, 4,749 marginal slot observations. Artifacts and methods are committed under research/optionality_capacity_reference/.
+- Support for 2QB+6RB options: 44/468 cohorts; common support versus 3QB+5RB: 32/468 across seven roster-seasons. For nine options, comparing 2QB+7RB versus 3QB+6RB leaves 17/468 (3.6%) across six roster-seasons. These are owned-pool support counts, not proof of acquisition unavailability or quota optimality.
+- First-slot paired QB/RB mean opportunity ordering changes across seasons. Means are small and measure a hindsight legal-lineup positive-WoRP ceiling, not material-tail events or realized capture. No exact allocation is established.
+- The <4% relevance STOP applies to further micro-refinement of the nine-slot reference comparison. A multi-league, common-support joint-allocation study with acquisition/active-roster controls would be a material scope expansion; do not silently publish arbitrary quota defaults.
+- App remains unchanged. Prior Scoring research and directional optionality evidence remain intact. This completed reference audit does not complete the user's requested numeric allocator.
