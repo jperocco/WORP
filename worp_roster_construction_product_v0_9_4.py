@@ -99,6 +99,28 @@ def _last_positive_rank(curve, position):
     return int(x["position_rank"].max()) if not x.empty else 0
 
 
+def _construction_value(curve, counts, teams):
+    """Per-roster WoRP protected by a positional construction.
+
+    A roster allocation of N players at a position corresponds to league-wide
+    access through rank N * teams. Summing that league-native curve and dividing
+    by team count yields a comparable per-roster structural value.
+    """
+    value = 0.0
+    for position in POSITIONS:
+        depth = int(counts[position]) * int(teams)
+        x = curve[curve["position"].eq(position)].copy()
+        x["position_rank"] = pd.to_numeric(x["position_rank"], errors="coerce")
+        x["three_year_worp_avg"] = pd.to_numeric(
+            x["three_year_worp_avg"], errors="coerce"
+        )
+        x = x[x["position_rank"].between(1, depth)].dropna(
+            subset=["three_year_worp_avg"]
+        )
+        value += float(x["three_year_worp_avg"].sum()) / int(teams)
+    return value
+
+
 def derive_league_native_envelope(
     curve,
     teams,
@@ -159,13 +181,32 @@ def derive_league_native_envelope(
     high = min(active_roster_size, start_n + 5, max_economic_total)
     low = max(start_n, low)
     high = max(low, high)
-    selected = [counts for total, counts in feasible if low <= total <= high]
-    if not selected:
+    in_range = [(total, counts) for total, counts in feasible if low <= total <= high]
+    if not in_range:
         nearest_total = min(
             {total for total, _ in feasible}, key=lambda total: abs(total - low)
         )
         low = high = nearest_total
-        selected = [counts for total, counts in feasible if total == nearest_total]
+        in_range = [(total, counts) for total, counts in feasible if total == nearest_total]
+
+    # Frozen V0.24 joint decision-equivalence view: absolute regret <= .05 and
+    # at least 90% of the observed same-total protection spread retained.
+    # The comparison is always within one Scoring-core total; no exact optimum
+    # or cross-total positional quota is inferred.
+    selected = []
+    for total in sorted({total for total, _ in in_range}):
+        candidates = [counts for candidate_total, counts in in_range if candidate_total == total]
+        scored = [(counts, _construction_value(curve, counts, teams)) for counts in candidates]
+        best = max(score for _, score in scored)
+        worst = min(score for _, score in scored)
+        spread = best - worst
+        equivalent = []
+        for counts, score in scored:
+            regret = best - score
+            protection = 1.0 if spread <= 1e-12 else 1.0 - regret / spread
+            if regret <= 0.05 + 1e-12 and protection >= 0.90 - 1e-12:
+                equivalent.append(counts)
+        selected.extend(equivalent or [max(scored, key=lambda item: item[1])[0]])
 
     result = {
         "source": "LEAGUE_NATIVE_DERIVED",
@@ -174,6 +215,7 @@ def derive_league_native_envelope(
         "scoring_core_high": int(high),
         "format_key": None,
         "frontier": frontier,
+        "decision_equivalence": "V0.24_ABS_050_PROTECTION_090",
     }
     for p in POSITIONS:
         result[f"{p}_low"] = min(counts[p] for counts in selected)
