@@ -22,6 +22,24 @@ def curve(frontiers):
     return pd.DataFrame(rows)
 
 
+def sloped_curve():
+    rows = []
+    # Deliberately different marginal economics: QB and TE retain value deeper
+    # than RB, while WR has a broad middle. This lets the test verify that the
+    # V0.24 gate excludes legal but economically poor allocations.
+    slopes = {"QB": 0.018, "RB": 0.045, "WR": 0.025, "TE": 0.020}
+    starts = {"QB": 1.30, "RB": 1.55, "WR": 1.45, "TE": 1.20}
+    for position in ("QB", "RB", "WR", "TE"):
+        for rank in range(1, 121):
+            value = starts[position] - slopes[position] * (rank - 1)
+            rows.append({
+                "position": position,
+                "position_rank": rank,
+                "three_year_worp_avg": value,
+            })
+    return pd.DataFrame(rows)
+
+
 class RosterConstructionProductTests(unittest.TestCase):
     def test_header_only_v0_32_recovers_from_local_v0_24(self):
         header_only = pd.DataFrame(columns=["format_key", "scoring_core_low"])
@@ -102,6 +120,21 @@ class RosterConstructionProductTests(unittest.TestCase):
         self.assertNotEqual(
             (one_qb["QB_low"], one_qb["QB_high"], one_qb["TE_low"]),
             (two_te["QB_low"], two_te["QB_high"], two_te["TE_low"]),
+        )
+
+    def test_v0_24_gate_excludes_economically_bad_legal_extremes(self):
+        result = roster_construction_envelope(
+            sloped_curve(), None, 12, 1, 2, 2, 2, 3, 1, 28, tep=True
+        )
+        # The ungated legal surface is QB1–4 / RB2–6 / WR2–6 / TE2–6.
+        # A decision-equivalent result must remove at least one legal extreme.
+        gated = (
+            result["QB_low"], result["QB_high"], result["RB_low"], result["RB_high"],
+            result["WR_low"], result["WR_high"], result["TE_low"], result["TE_high"],
+        )
+        self.assertNotEqual(gated, (1, 4, 2, 6, 2, 6, 2, 6))
+        self.assertEqual(
+            result["decision_equivalence"], "V0.24_ABS_050_PROTECTION_090"
         )
 
 
