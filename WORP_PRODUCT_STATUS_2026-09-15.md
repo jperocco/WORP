@@ -1,7 +1,7 @@
 # WoRP Lab — Product Status and Handoff
 
 Date: 2026-09-16  
-Status: ACTIVE — V0.9.4.3 PRODUCT VALIDATION  
+Status: PAUSED SAFELY — V0.9.4.6 CURRENT PRODUCT  
 Authority: this document records the latest product decisions and supersedes older immediate-next-step notes where they conflict.
 
 ## Canonical version distinction
@@ -92,20 +92,44 @@ Lineup Economics passed visual and numerical validation in V0.9.4.1 and is froze
 
 ## Current implementation status
 
-- `app_v0_9_4_3.py` is the launcher-compatible current app.
+- `app_v0_9_4_6.py` is the launcher-compatible current app. The user's `Abrir_WoRP_Lab.command` selects the highest `app_v0_*.py` version automatically.
 - Lineup Economics is frozen after visual and numerical validation.
-- Roster Construction has two product paths: exact historical support and lower-validation league-native derivation.
+- Roster Construction has two product paths: exact historical support and league-native derivation.
 - A header-only/missing V0.32 product CSV is recovered in memory from the user's populated local V0.24 envelope using the frozen V0.32 aggregation.
-- If neither populated V0.32 nor V0.24 research output exists locally, the app remains fail-honest and uses only the clearly labeled derived path.
+- If neither populated V0.32 nor V0.24 research output exists locally, the app derives the envelope from the selected league without nearest-format substitution.
 - Derived-format validation covers 1QB, Superflex, 2TE, active-roster capacity, and non-additive positional bounds.
 - No nearest-format, Wookiee fallback, player-name membership, or new research threshold was introduced.
+- Eleven automated tests pass: three for Lineup Economics and eight for Roster Construction.
+
+## Whole-roster construction update
+
+V0.9.4.5 closed the roster-size presentation gap by separating the complete active roster into two layers:
+
+1. **Scoring Core:** the economically meaningful scoring range and its positional envelope.
+2. **Optionality capacity:** every remaining active-roster slot after the Scoring Core.
+
+The active roster is calculated from starting slots plus bench slots. Bench depth changes Optionality capacity, but does not mechanically inflate the Scoring Core. For example, with a Scoring Core of 14–16:
+
+- active roster 16 → Optionality capacity 0–2;
+- active roster 24 → Optionality capacity 8–10;
+- active roster 25 → Optionality capacity 9–11.
+
+Optionality evidence remains directional rather than an invented positional quota:
+
+- Superflex: QB + RB are the primary optionality targets;
+- 1QB: RB is primary and QB secondary;
+- WR is deprioritized by the validated hurdle;
+- TE remains unresolved.
+
+V0.9.4.6 is a presentation-only release. It removes the light-gray backend/methodology captions from Roster Construction and leaves the calculations unchanged. The visible block now contains only Active roster, Scoring Core, positional core envelope, Optionality capacity, and positional priorities.
 
 ## Immediate next steps
 
-1. Validate one exact-historical league locally so the recovered V0.24 → V0.32 path is observed in the product.
-2. Review derived envelopes across materially different real leagues for decision usefulness, especially overly broad positional bounds.
-3. If those checks pass, freeze Roster Construction product integration.
-4. Move next to the structural, player-free Roster Diagnostic presentation.
+1. User opens V0.9.4.6 through `Abrir_WoRP_Lab.command` and confirms the cleaned presentation.
+2. Do not make another conceptual or methodological Roster Construction change with the fallback model.
+3. Resume substantive review when the stronger model is available.
+4. Then decide whether the directional Optionality presentation is sufficient for product freeze or needs a better user-facing representation without inventing exact quotas.
+5. After Roster Construction is frozen, move to the structural, player-free Roster Diagnostic presentation.
 
 ## Execution guardrails
 
