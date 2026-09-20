@@ -178,3 +178,15 @@ The user authorized expanding the calculations after the reference audit. This s
 - This is a lagged owned-pool diagnostic, not a prospective acquisition policy. The baseline is prior-use based, not a validated V0.32 core tuple. IR/taxi eligibility is not disaggregated. Low-use WR/TE alternatives are not tested. These limits prevent translating the comparison into an exact whole-roster allocation.
 - No arbitrary optionality quota was deployed. App stays V0.9.4.6; existing Engine/Core/Lineup Economics decisions remain unchanged.
 - User supplied Scott Connor's “WAR Has Changed” article for evaluation. Recommendations from that review are proposals, not authorization to replace the engine or reintroduce named-player product membership.
+
+## 2026-09-20 — Article distinction accepted; four-position calculation and capacity gate
+
+User approved moving forward with the distinction between available opportunity and usable lineup contribution, preserving the frozen engine.
+
+Implemented and ran worp_optionality_four_positions.py on the same 18 historical league-seasons. It compares adding one QB/RB/WR/TE separately to the same prior-use baseline, keeping each candidate across four weeks and respecting legal FLEX/SF competition. Ten tests pass across marginal and joint-allocation components. Code and results are in research/optionality_four_positions/.
+
+A conservative capacity screen excludes historical ownership snapshots larger than active starting-plus-bench capacity. Only 97/2,544 cohorts (3.81%) pass; 94 provide a paired comparison, across seven league-seasons. This is a data limitation: snapshots do not sufficiently distinguish historical active/IR/taxi status, and passing the size screen alone does not prove active eligibility. The surviving sample is selected and cannot justify full-roster positional quotas.
+
+The agreed below-4% relevance STOP is now explicit: discuss the decision value of reconstructing historical active availability before further refining this subset. Do not confuse this with discarding optionality, changing prior QB/RB conclusions, or claiming the numeric allocator is complete. Historical baseline/core translation and acquisition controls also remain unresolved.
+
+Engine V0.2.1, Scoring Core research, Lineup Economics, and app V0.9.4.6 are unchanged. The new calculation is a research component, not a deployed product recommendation.
