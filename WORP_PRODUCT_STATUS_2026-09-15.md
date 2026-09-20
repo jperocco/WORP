@@ -202,3 +202,13 @@ Implemented worp_active_roster_bounds.py and four passing tests. Conditional on 
 This recovers count constraints, not historical active identities. Prior marginal calculations remain restricted sensitivity diagnostics, not validated active-roster recommendations. No artificial identities, quota defaults, or new thresholds were inserted. Engine/app unchanged.
 
 Exact retrospective active-roster allocation remains blocked on dated reserve/taxi assignments in the checked sources. A simulated positional-portfolio allocator would be a separate explicit modeling choice, not an empirical recovery. Do not continue issuing tiny study variants as though they complete the requested full-roster numerical allocator.
+
+## 2026-09-20 — Scott Connor archive and modeled portfolios
+
+User requested preserving Scott Connor's supplied article as a project update and explicitly authorized the next modeled-portfolio step. Full supplied text is archived at docs/references/scott_connor_war_has_changed_2026-09-19.md. WORP_UPDATE_SCOTT_CONNOR_2026-09-20.md records source attribution, accepted distinctions, preserved engine/Core/Lineup Economics decisions, and future hypotheses.
+
+Implemented worp_positional_portfolio_simulation.py; four tests pass. Completed a 2025 12T Superflex case at capacities 15 and 22 (5 versus 12 bench places), with 64 and 256 sampled rosters per composition, three disjoint windows, and exact starting-slot eligibility. A separate 2024 12T case has 11 starters rather than 10, so its 5/12-bench capacities are 16/23; it is not a controlled year-over-year replication. All scenario surfaces and assumptions are saved under research/positional_portfolio_simulation/.
+
+Profiles come from preceding-week league-wide ownership and preceding three-week positional WoRP rank blocks. Simulated holdings stay fixed across compared compositions and each future window. Full capacity is filled exactly; legal lineup competition is optimized jointly. Reported maxima vary by window and sometimes draw count. These are hindsight opportunity ceilings under an explicit selection model, not active-roster observations, expected-win forecasts, market-budget-equivalent portfolios, or validated quotas.
+
+The initial model step is complete. It does not complete the product allocator: selection-policy sensitivity and prospective/manual capture remain unresolved. No new thresholds, redefined Scoring Core, or arbitrary roster defaults were deployed. Engine and app unchanged.
