@@ -1,0 +1,9 @@
+{
+  "completed_utc": "2026-09-20T10:55:34.170313+00:00",
+  "sha256": {
+    "worp_manual_capture_test.py": "df547ef2c5b3a8fd043529fb11f56e1c36b3fe9918ee27c7c6ff1e8a3c9a2a95",
+    "worp_positional_portfolio_simulation.py": "c87f16b55b119721fa3aeecae4a19696fc83bee55a9e020d5c8d0e44f5029352",
+    "research/portfolio_temporal_validation/fold_results.csv": "c3d0b4ec73daf0fd90098e21476b1868e707a79132e6b9d2655b9c716ec49dea"
+  },
+  "oracle_max_absolute_difference": 1.7763568394002505e-15
+}
