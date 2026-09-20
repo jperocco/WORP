@@ -166,3 +166,15 @@ Next: validate the recovered historical output in the user's app, then repair re
 - First-slot paired QB/RB mean opportunity ordering changes across seasons. Means are small and measure a hindsight legal-lineup positive-WoRP ceiling, not material-tail events or realized capture. No exact allocation is established.
 - The <4% relevance STOP applies to further micro-refinement of the nine-slot reference comparison. A multi-league, common-support joint-allocation study with acquisition/active-roster controls would be a material scope expansion; do not silently publish arbitrary quota defaults.
 - App remains unchanged. Prior Scoring research and directional optionality evidence remain intact. This completed reference audit does not complete the user's requested numeric allocator.
+
+## 2026-09-20 — Authorized multi-league optionality diagnostic completed
+
+The user authorized expanding the calculations after the reference audit. This supersedes the earlier instruction to stop at that reference comparison.
+
+- Completed 18 league-seasons from 2023–2025, across 1QB, SF/1TE and SF/2TE; exact Sleeper scoring and frozen engine. All selected runs completed without reported failures. Five focused tests pass.
+- 2,544 roster-week cohorts; 500 adjacent equal-budget comparisons from 150 distinct roster-week cohorts. Overlapping weeks, multiple splits and simulation draws are not independent observations.
+- For eight options, exchanging 2QB+6RB for 3QB+5RB changes mean four-week opportunity by −0.006398 in SF/1TE (19 paired cohorts, three league-seasons) and −0.024851 in SF/2TE (36 paired cohorts, five league-seasons). For nine options, the corresponding means favor the extra QB slightly but league-season signs vary; only nine and eight paired cohorts respectively. These units are summed positive-WoRP opportunity, not observed wins or a calibrated joint team win probability.
+- Numerical results, code, tests, selection manifest and cache hashes are committed under research/optionality_multileague/ and worp_optionality_multileague.py. Raw public-data caches remain local; replay can download them again.
+- This is a lagged owned-pool diagnostic, not a prospective acquisition policy. The baseline is prior-use based, not a validated V0.32 core tuple. IR/taxi eligibility is not disaggregated. Low-use WR/TE alternatives are not tested. These limits prevent translating the comparison into an exact whole-roster allocation.
+- No arbitrary optionality quota was deployed. App stays V0.9.4.6; existing Engine/Core/Lineup Economics decisions remain unchanged.
+- User supplied Scott Connor's “WAR Has Changed” article for evaluation. Recommendations from that review are proposals, not authorization to replace the engine or reintroduce named-player product membership.
