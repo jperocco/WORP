@@ -1,0 +1,74 @@
+{
+  "rosters": {
+    "league_id": "1180084795436826624",
+    "rows": 12,
+    "keys": [
+      "co_owners",
+      "keepers",
+      "league_id",
+      "metadata",
+      "owner_id",
+      "player_map",
+      "players",
+      "reserve",
+      "roster_id",
+      "settings",
+      "starters",
+      "taxi"
+    ],
+    "types": [
+      "None"
+    ],
+    "sha256": "e0b044ca80a476870f2787eb74f77ca7b602c162605c4cb654bcb6a496d87265"
+  },
+  "transactions_w3": {
+    "league_id": "1180084795436826624",
+    "rows": 7,
+    "keys": [
+      "adds",
+      "consenter_ids",
+      "created",
+      "creator",
+      "draft_picks",
+      "drops",
+      "leg",
+      "metadata",
+      "roster_ids",
+      "settings",
+      "status",
+      "status_updated",
+      "transaction_id",
+      "type",
+      "waiver_budget"
+    ],
+    "types": [
+      "waiver"
+    ],
+    "sha256": "bac888d3191f39d0dba6e0cf3c81ce8077ed3670e1e20a1cde3f06e89ca0961d"
+  },
+  "transactions_w4": {
+    "league_id": "1180084795436826624",
+    "rows": 2,
+    "keys": [
+      "adds",
+      "consenter_ids",
+      "created",
+      "creator",
+      "draft_picks",
+      "drops",
+      "leg",
+      "metadata",
+      "roster_ids",
+      "settings",
+      "status",
+      "status_updated",
+      "transaction_id",
+      "type",
+      "waiver_budget"
+    ],
+    "types": [
+      "waiver"
+    ],
+    "sha256": "6361b3daa79c649c37bf768705458990560cafaa6809bda4f366409896ba8d57"
+  }
+}
