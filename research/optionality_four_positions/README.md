@@ -41,3 +41,8 @@ python3 worp_optionality_four_positions.py
 ```
 
 The engine, Scoring Core, Lineup Economics and app V0.9.4.6 remain unchanged.
+
+
+## Superseding correction — active-roster recovery
+
+The below-4% STOP above was misapplied: low coverage is a central data problem, not a small residual exception. The user authorized continuation. See `../active_roster_recovery/README.md`: 2,538/2,544 observations admit conditional count bounds, 360 fix the total count, and none fix all four positional counts. This does not validate active identities or the selected marginal sample. Keep these marginal outputs as a restricted sensitivity diagnostic; no positional product quota is established.
