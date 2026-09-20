@@ -1,0 +1,30 @@
+{
+  "league_id": "1180084795436826624",
+  "season": 2025,
+  "teams": 12,
+  "slots": [
+    "QB",
+    "RB",
+    "RB",
+    "WR",
+    "WR",
+    "WR",
+    "TE",
+    "FLEX",
+    "FLEX",
+    "SUPER_FLEX"
+  ],
+  "bench_scenarios": [
+    5,
+    12
+  ],
+  "draws": 256,
+  "windows": [
+    4,
+    8,
+    12
+  ],
+  "selection": "prior-owned league pool, preceding 3-week signed WoRP rank blocks; one profile per team-sized block",
+  "objective": "4-week sum of positive WoRP in legal hindsight lineups; not joint win probability",
+  "status": "modeled sensitivity scenarios; no product quotas"
+}
