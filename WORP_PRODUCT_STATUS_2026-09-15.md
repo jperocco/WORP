@@ -242,3 +242,13 @@ Selected negative outcomes count; negative bench outcomes do not. Missing stat r
 Three focused tests pass; recreated oracle matches all prior evaluated cases within 1.8e-15. Code, protocol, provenance and results are at research/manual_capture/ and worp_manual_capture_test.py.
 
 The specific sensitivity test is complete. Exact quotas selected only by perfect-lineup opportunity are not approved for manual-league product recommendations. Do not invent a universal capture discount, declare optionality worthless, or overwrite frozen Core/QB-RB evidence. No app or engine change.
+
+## 2026-09-20 — Direct composition comparison by manual capture completed
+
+User explicitly approved comparing compositions by earlier pre-game-lineup results. Implemented worp_manual_composition_comparison.py across all 18 selected league-seasons, bench5/12, two lineup policies and two later windows. Counts are selected only from earlier manual-capture outcomes; future supply failures remain failures.
+
+144 planned cases: 131 evaluated, four without training support, nine chosen compositions unsupported later. On the 131 paired comparisons against the prior perfect-opportunity selection rule evaluated under the same manual policy: 46 improvements, 71 deteriorations, 14 numerical ties; unweighted mean difference −.020170 four-week summed signed WoRP. All short-bench groups lose on the league-weighted mean under both policies; deep-bench results are mixed, mostly negative. Scenario counts are correlated, not independent accuracy measurements.
+
+Three tests pass; fast evaluation reproduces all 138 preceding manual-policy cases within 8.9e-16. Code, protocol, choices, paired results and interpretation are committed at research/manual_composition/.
+
+Decision: this particular manual-aware objective change is not approved for deployment; it did not show consistent advantage. This neither validates the incumbent perfect-opportunity allocator nor disproves all manual-aware methods. The requested comparison is complete. Do not tune an after-the-fact threshold to manufacture approval or present selected counts as validated quotas. Frozen Engine/Core/Lineup Economics and app remain unchanged.
