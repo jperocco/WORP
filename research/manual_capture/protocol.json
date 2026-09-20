@@ -1,0 +1,16 @@
+{
+  "policies": [
+    "prior_3_week_mean_fantasy_points",
+    "prior_5_week_mean_fantasy_points"
+  ],
+  "compositions": "frozen earlier-data choices from temporal validation; no reselection",
+  "draws": 256,
+  "seeds": [
+    7000,
+    17000,
+    27000
+  ],
+  "missing_weekly_stats": "assume zero fantasy points; use same-week positional frozen-engine zero-point WoRP",
+  "deployment_gate": "no automatic approval from aggregate capture; divergent policy conclusions block recommendation; no new percentage threshold",
+  "limitations": "simple baseline policies, no historical injury/bye availability or external projections; not observed manager decisions"
+}
