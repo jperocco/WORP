@@ -1,0 +1,27 @@
+{
+  "completed_utc": "2026-09-20T10:31:51.570392+00:00",
+  "sha256": {
+    "worp_portfolio_temporal_validation.py": "7ac0ab70b61ff3cd1975e0a3778c3bec2501e81c52ff7eb37740a80540d04c86",
+    "worp_positional_portfolio_simulation.py": "c87f16b55b119721fa3aeecae4a19696fc83bee55a9e020d5c8d0e44f5029352",
+    "worp_engine.py": "8aa8eb246163bc7f15d44b45a6cb98cdfb79ba34de06253509b1066a0795ed89",
+    "research/optionality_multileague/selected_league_seasons.csv": "20cc3a5656474b48ee65fa7e053067618893ba3736e81d9847de1f684f427fab",
+    "research/optionality_multileague/cache/weekly_1045730844721270784.csv": "dc40ed8092910444e84e91b8f0cc4ad7a50b8c2e1cb8e7b10b8a19bbb0210445",
+    "research/optionality_multileague/cache/weekly_1048204852251164672.csv": "2956107b68187ee5a0becedbbf2680bd925eff889b80bd87af464266c9541d43",
+    "research/optionality_multileague/cache/weekly_1048274355802820608.csv": "0701e45df5c540a7afb9820380d6569255354d9b6ca03a9088f76a1ef09d1582",
+    "research/optionality_multileague/cache/weekly_1048278093472837632.csv": "d5a8711ff6f5d3195c2c703deea8b8499e11844e7df616762a256f479e2fcd20",
+    "research/optionality_multileague/cache/weekly_1048901308398288896.csv": "df6ecfcdb3f57485bd2a7081e6c2e8ac7c56310f7730541f9958832e8f337569",
+    "research/optionality_multileague/cache/weekly_1055621034914820096.csv": "30389e6ba041b55c23cef8798b7f4522e4fe8608e7776e848665c8b475cb878e",
+    "research/optionality_multileague/cache/weekly_1180084795436826624.csv": "b870db958d7144aaaff818671beb324883d405d9b907f30108ff4d52cc087dea",
+    "research/optionality_multileague/cache/weekly_1180224010881282048.csv": "37f2c45e6f0bcff10568fc378c1188c9d44fa764074d962b02b39c58d32f53cf",
+    "research/optionality_multileague/cache/weekly_1180354306008649728.csv": "6a6ee0a28cbd7508c0199773302f50a063148ea2e8ba3200e9b270fd76471a1e",
+    "research/optionality_multileague/cache/weekly_1180578870847586304.csv": "fce75ce4f623825c0ab245b91037755a39db4fd2a91d025c498eb398fa1bb8a8",
+    "research/optionality_multileague/cache/weekly_1180667636675596288.csv": "1742cd0eb95bc0817e3b39d362d90345963b85b83d9ca1dc9cde9adce6080402",
+    "research/optionality_multileague/cache/weekly_1201959553390891008.csv": "729153d7366bcb962801875e2b4499ef357651bdcc742ee90b396d342ceeb4f7",
+    "research/optionality_multileague/cache/weekly_914741498980225024.csv": "6cf2066890e424f5b19c768dc670b2939fa88f14865c111b9607428e6ad07126",
+    "research/optionality_multileague/cache/weekly_918260594971672576.csv": "d94c25689489279ed0500e16b80426a6fe4116f3b4e2c7dd9b2571aaf5eb7c31",
+    "research/optionality_multileague/cache/weekly_918960870980501504.csv": "f83c92e970b043dd4fe7940a4485d8ba0b4da2496911ed07e2cd2aa6f9a7348e",
+    "research/optionality_multileague/cache/weekly_920016644603248640.csv": "432eb3ad1dc7eb7adf641c0529d2513a8426d53366981c7833de2f8e3406493c",
+    "research/optionality_multileague/cache/weekly_920523240571850752.csv": "3c2b375c127ecf61fae6c85bf00c7b53337e3a888584253fbe78134592ac72d1",
+    "research/optionality_multileague/cache/weekly_969999751733186560.csv": "3aa4d8676696f94092adb0d6bf2e17b63ba249c4fe4274f26fd37507e377e0a5"
+  }
+}
