@@ -57,7 +57,7 @@ def run(source, out, league_id, benches, draws, lookback=3, seed=7000):
     weekly = pd.read_csv(source/'cache'/f'weekly_{league_id}.csv', dtype={'player_id':str})
     pmap = json.loads((source/'cache/players.json').read_text())
     outcomes = {int(w):dict(zip(g.player_id,g.weekly_worp)) for w,g in weekly.groupby('week')}
-    rows = []
+    rows, unsupported = [], []
     for week in (4,8,12):
         snapshots = json.loads((source/'cache'/f'matchups_{league_id}_{week-1}.json').read_text())
         pool = set().union(*(set(s.get('players') or []) for s in snapshots))
@@ -71,7 +71,9 @@ def run(source, out, league_id, benches, draws, lookback=3, seed=7000):
                   for w in range(week,week+4)]
         for capacity, vectors in scenarios.items():
             if not vectors:
-                raise ValueError(f'No feasible compositions for capacity {capacity}')
+                unsupported.append(dict(league_id=league_id,week=week,capacity=capacity,
+                                        reason='insufficient complete rank blocks'))
+                continue
             values = np.array([sum(evaluate(vector,tables,legal) for tables in future) for vector in vectors])
             means = values.mean(axis=1)
             best = float(means.max())
@@ -82,6 +84,9 @@ def run(source, out, league_id, benches, draws, lookback=3, seed=7000):
                                  gap_to_window_best=best-float(mean)))
             print(f'PASS week {week} capacity {capacity}: {len(vectors)} compositions',flush=True)
     out.mkdir(parents=True,exist_ok=True)
+    pd.DataFrame(unsupported, columns=['league_id','week','capacity','reason']).to_csv(out/'unsupported.csv',index=False)
+    if not rows:
+        raise ValueError('No feasible scenarios; see unsupported.csv')
     detail = pd.DataFrame(rows)
     detail.to_csv(out/'composition_detail.csv',index=False)
     summary = detail.groupby(['capacity','bench']+list(POS),as_index=False).agg(
