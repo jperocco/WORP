@@ -1,0 +1,29 @@
+{
+  "created_utc": "2026-09-20T10:26:47.019362+00:00",
+  "league_id": "1180084795436826624",
+  "lookbacks": [
+    3,
+    5,
+    0
+  ],
+  "seeds": [
+    7000,
+    17000,
+    27000
+  ],
+  "draws": 256,
+  "benches": [
+    5,
+    12
+  ],
+  "windows": [
+    4,
+    8,
+    12
+  ],
+  "sha256": {
+    "worp_positional_portfolio_simulation.py": "659763094c3627ca944367a6e426cc3a56f89c7883a2ef027a916ce89be94831",
+    "worp_portfolio_sensitivity.py": "97219eeb4849f88b156694d35e6c0de2d59e7a268a59c31f2f42de0ec0754530",
+    "research/optionality_multileague/cache/weekly_1180084795436826624.csv": "b870db958d7144aaaff818671beb324883d405d9b907f30108ff4d52cc087dea"
+  }
+}
