@@ -212,3 +212,11 @@ Implemented worp_positional_portfolio_simulation.py; four tests pass. Completed 
 Profiles come from preceding-week league-wide ownership and preceding three-week positional WoRP rank blocks. Simulated holdings stay fixed across compared compositions and each future window. Full capacity is filled exactly; legal lineup competition is optimized jointly. Reported maxima vary by window and sometimes draw count. These are hindsight opportunity ceilings under an explicit selection model, not active-roster observations, expected-win forecasts, market-budget-equivalent portfolios, or validated quotas.
 
 The initial model step is complete. It does not complete the product allocator: selection-policy sensitivity and prospective/manual capture remain unresolved. No new thresholds, redefined Scoring Core, or arbitrary roster defaults were deployed. Engine and app unchanged.
+
+## 2026-09-20 — Portfolio lookback/sampling sensitivity completed
+
+User authorized advancing. Ran nine modeled configurations on the same 2025 12T QB/2RB/3WR/TE/2FLEX/SF case: preceding 3 weeks, 5 weeks, or season-to-date selection rankings; seeds 7000/17000/27000; 256 sampled rosters; windows W4–7/W8–11/W12–15; capacities 15/22. Duplicate effective early windows are removed in summaries, leaving 21 cases, not independent league observations. Only compositions with complete case support are ranked.
+
+Smallest worst-case opportunity-gap candidates: at total15, QB3/RB4/WR5/TE3 (mean gap .025752, largest gap .103860); at total22, QB4/RB7/WR8/TE3 (.032900/.073459). At22, QB4/RB6/WR9/TE3 and QB4/RB6/WR8/TE4 have similar gaps; mean and worst-case criteria select different rows. No universal equivalence threshold or uniquely required quota is asserted.
+
+Five tests pass, including deduplication and incomplete-support exclusion. Full results and runner are committed under research/portfolio_sensitivity/ and worp_portfolio_sensitivity.py. This completes the initial selection-lookback/sampling sensitivity step. It does not validate the restricted rank-block selection policy, acquisition cost/feasibility, prospective generalization or manual-lineup capture. The article archive and prior product definitions remain authoritative. No app or frozen-engine change.
