@@ -220,3 +220,13 @@ User authorized advancing. Ran nine modeled configurations on the same 2025 12T 
 Smallest worst-case opportunity-gap candidates: at total15, QB3/RB4/WR5/TE3 (mean gap .025752, largest gap .103860); at total22, QB4/RB7/WR8/TE3 (.032900/.073459). At22, QB4/RB6/WR9/TE3 and QB4/RB6/WR8/TE4 have similar gaps; mean and worst-case criteria select different rows. No universal equivalence threshold or uniquely required quota is asserted.
 
 Five tests pass, including deduplication and incomplete-support exclusion. Full results and runner are committed under research/portfolio_sensitivity/ and worp_portfolio_sensitivity.py. This completes the initial selection-lookback/sampling sensitivity step. It does not validate the restricted rank-block selection policy, acquisition cost/feasibility, prospective generalization or manual-lineup capture. The article archive and prior product definitions remain authoritative. No app or frozen-engine change.
+
+## 2026-09-20 — Chronological multi-league test completed
+
+User authorized the proposed validation step. Implemented worp_portfolio_temporal_validation.py and ran all 18 manifest league-seasons at bench5/12, with a fixed three-week profile-ranking policy, three seeds and 256 sampled rosters. Select composition from W4–7 before evaluating W8–11; select from W4–7/W8–11 before W12–15. The selection function cannot consult future scores or silently reselect when test supply fails.
+
+72 cases planned: 69 evaluated, two without training supply, one chosen composition unavailable later. This is 95.83% execution coverage, not predictive accuracy. Mean league opportunity gaps by group range .047125–.072694 across four-week windows; worst test-window mean gap .239202. Units are summed positive weekly WoRP opportunity, not joint win probability or observed victories. No ex-post acceptance threshold was invented.
+
+Eight tests pass, including future-outcome perturbation and no-reselection tests. Protocol, per-fold choices, gaps, failures and summaries are at research/portfolio_temporal_validation/. All evaluated folds had planned complete training support.
+
+Some windows were seen during earlier development; call this retrospective chronological validation, not pristine independent holdout or prospective validation. Selection-policy, acquisition and manual-capture limitations persist. The test is complete; automatic app quotas are not validated. No Engine/Core/Lineup Economics/app change.
