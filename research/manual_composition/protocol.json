@@ -1,0 +1,29 @@
+{
+  "seeds": [
+    7000,
+    17000,
+    27000
+  ],
+  "draws": 256,
+  "profile_lookback": 3,
+  "lineup_lookbacks": [
+    3,
+    5
+  ],
+  "windows": [
+    4,
+    8,
+    12
+  ],
+  "test_windows": [
+    8,
+    12
+  ],
+  "benches": [
+    5,
+    12
+  ],
+  "selection": "minimize worst earlier-window signed-capture regret, then mean regret and lexical counts",
+  "benchmark": "previously frozen perfect-opportunity choices evaluated by the same manual policy",
+  "caveats": "retrospective simulated rank-block rosters; no injury/bye filters; no automatic product acceptance"
+}
