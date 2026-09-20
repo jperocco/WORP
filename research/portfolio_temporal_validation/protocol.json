@@ -1,0 +1,45 @@
+{
+  "league_seasons": [
+    "920523240571850752",
+    "969999751733186560",
+    "1048204852251164672",
+    "1048901308398288896",
+    "1180667636675596288",
+    "1180224010881282048",
+    "918960870980501504",
+    "914741498980225024",
+    "1055621034914820096",
+    "1045730844721270784",
+    "1201959553390891008",
+    "1180084795436826624",
+    "918260594971672576",
+    "920016644603248640",
+    "1048274355802820608",
+    "1048278093472837632",
+    "1180354306008649728",
+    "1180578870847586304"
+  ],
+  "lookback": 3,
+  "seeds": [
+    7000,
+    17000,
+    27000
+  ],
+  "draws": 256,
+  "benches": [
+    5,
+    12
+  ],
+  "folds": {
+    "8": [
+      4
+    ],
+    "12": [
+      4,
+      8
+    ]
+  },
+  "rule": "minimize worst training opportunity gap, then mean gap, then lexical positional counts",
+  "unsupported": "record failure, never reselect from test data",
+  "caveat": "retrospective chronological validation, not pristine untouched holdout: earlier development examined some windows"
+}
