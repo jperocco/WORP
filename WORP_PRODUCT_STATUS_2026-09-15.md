@@ -190,3 +190,15 @@ A conservative capacity screen excludes historical ownership snapshots larger th
 The agreed below-4% relevance STOP is now explicit: discuss the decision value of reconstructing historical active availability before further refining this subset. Do not confuse this with discarding optionality, changing prior QB/RB conclusions, or claiming the numeric allocator is complete. Historical baseline/core translation and acquisition controls also remain unresolved.
 
 Engine V0.2.1, Scoring Core research, Lineup Economics, and app V0.9.4.6 are unchanged. The new calculation is a research component, not a deployed product recommendation.
+
+## 2026-09-20 — Active-roster bounds; correction of coverage STOP
+
+The user authorized proceeding. The previous 3.81% survival rate was incorrectly treated as the residual-exception 4% rule: 96.19% missing coverage is central, not residual. That STOP is superseded.
+
+Checked all 324 cached matchup schemas, official Sleeper endpoint documentation, and one live roster endpoint plus two transaction weeks. Matchups do not expose reserve/taxi assignments; the roster endpoint does not supply a documented weekly timeline, and probed transactions did not recover one. Do not backdate end-state reserve/taxi lists.
+
+Implemented worp_active_roster_bounds.py and four passing tests. Conditional on the supplied capacities/settings, 2,538/2,544 roster-weeks admit active-count/positional bounds; six conflict and remain flagged. 360 compatible cases have an exact conditional active total; zero have all four positional counts determined. Results are in research/active_roster_recovery/.
+
+This recovers count constraints, not historical active identities. Prior marginal calculations remain restricted sensitivity diagnostics, not validated active-roster recommendations. No artificial identities, quota defaults, or new thresholds were inserted. Engine/app unchanged.
+
+Exact retrospective active-roster allocation remains blocked on dated reserve/taxi assignments in the checked sources. A simulated positional-portfolio allocator would be a separate explicit modeling choice, not an empirical recovery. Do not continue issuing tiny study variants as though they complete the requested full-roster numerical allocator.
