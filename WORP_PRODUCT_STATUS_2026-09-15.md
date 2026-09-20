@@ -230,3 +230,15 @@ User authorized the proposed validation step. Implemented worp_portfolio_tempora
 Eight tests pass, including future-outcome perturbation and no-reselection tests. Protocol, per-fold choices, gaps, failures and summaries are at research/portfolio_temporal_validation/. All evaluated folds had planned complete training support.
 
 Some windows were seen during earlier development; call this retrospective chronological validation, not pristine independent holdout or prospective validation. Selection-policy, acquisition and manual-capture limitations persist. The test is complete; automatic app quotas are not validated. No Engine/Core/Lineup Economics/app change.
+
+## 2026-09-20 — Manual-lineup policy sensitivity completed
+
+Frozen 69 chronological-validation choices evaluated using preceding 3- or 5-week fantasy-point lineup selection; current-week outcomes never select starters. Three seeds, 256 holdings, original three supply failures preserved.
+
+Positive capture fractions range 83.47–86.84% with five bench places and 74.56–79.43% with twelve. Matched deeper-roster comparisons add .433–.526 four-week positive hindsight opportunity, but only .0136–.0421 signed capture under these simple policies. Units are summed individual WoRP measurements, not joint win probability or actual wins. Lower capture fractions do not by themselves imply worse rosters.
+
+Selected negative outcomes count; negative bench outcomes do not. Missing stat rows assume zero fantasy points and use frozen-engine same-week positional zero-point WoRP, not replacement-level zero. Policies omit historical injury/bye filters and external projections: they do not measure actual manager skill or establish a ceiling on informed manual capture.
+
+Three focused tests pass; recreated oracle matches all prior evaluated cases within 1.8e-15. Code, protocol, provenance and results are at research/manual_capture/ and worp_manual_capture_test.py.
+
+The specific sensitivity test is complete. Exact quotas selected only by perfect-lineup opportunity are not approved for manual-league product recommendations. Do not invent a universal capture discount, declare optionality worthless, or overwrite frozen Core/QB-RB evidence. No app or engine change.
