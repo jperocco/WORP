@@ -1,0 +1,12 @@
+{
+  "completed_utc": "2026-09-20T18:21:55.386749+00:00",
+  "sha256": {
+    "worp_manual_composition_comparison.py": "e5cf842f649fe1236e9b92186c26637332feae171374ccf75277c1e1d34a89cc",
+    "worp_positional_portfolio_simulation.py": "c87f16b55b119721fa3aeecae4a19696fc83bee55a9e020d5c8d0e44f5029352",
+    "research/manual_capture/case_results.csv": "49de56e308bd7600a943113a183464a4780f950b5ba23082603c557c82e36697",
+    "research/optionality_multileague/selected_league_seasons.csv": "20cc3a5656474b48ee65fa7e053067618893ba3736e81d9847de1f684f427fab"
+  },
+  "prior_case_crosscheck_count": 138,
+  "maximum_absolute_difference": 8.881784197001252e-16,
+  "raw_surfaces_committed": false
+}
