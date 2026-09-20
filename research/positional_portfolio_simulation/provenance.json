@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-09-20T10:22:51.678325+00:00",
+  "sha256": {
+    "worp_engine.py": "8aa8eb246163bc7f15d44b45a6cb98cdfb79ba34de06253509b1066a0795ed89",
+    "worp_positional_portfolio_simulation.py": "e5cdfe33381bedab7ca4bfa9dd8f1dc7ef0093d9c90cd469de0acbb0525f24fd",
+    "research/optionality_multileague/selected_league_seasons.csv": "20cc3a5656474b48ee65fa7e053067618893ba3736e81d9847de1f684f427fab",
+    "research/optionality_multileague/cache/weekly_1180084795436826624.csv": "b870db958d7144aaaff818671beb324883d405d9b907f30108ff4d52cc087dea",
+    "research/optionality_multileague/cache/weekly_1045730844721270784.csv": "dc40ed8092910444e84e91b8f0cc4ad7a50b8c2e1cb8e7b10b8a19bbb0210445"
+  },
+  "status": "modeled scenarios, not validated quotas"
+}
