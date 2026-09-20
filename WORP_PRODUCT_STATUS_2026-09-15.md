@@ -252,3 +252,15 @@ User explicitly approved comparing compositions by earlier pre-game-lineup resul
 Three tests pass; fast evaluation reproduces all 138 preceding manual-policy cases within 8.9e-16. Code, protocol, choices, paired results and interpretation are committed at research/manual_composition/.
 
 Decision: this particular manual-aware objective change is not approved for deployment; it did not show consistent advantage. This neither validates the incumbent perfect-opportunity allocator nor disproves all manual-aware methods. The requested comparison is complete. Do not tune an after-the-fact threshold to manufacture approval or present selected counts as validated quotas. Frozen Engine/Core/Lineup Economics and app remain unchanged.
+
+## 2026-09-20 — V0.9.4.7 roster scenarios released
+
+User explicitly accepted returning to positional economics, retaining Core references, displaying all active places, and letting the user construct complete positional scenarios rather than claiming a validated automatic ideal split. This supersedes earlier immediate-next-step research notes. The exact-quota research sequence is closed for this product iteration.
+
+Current ready app: app_v0_9_4_7.py; existing Abrir_WoRP_Lab.command selects it after pulling. No builder required. Module worp_roster_scenarios.py implements user-entered Scoring/Extra counts, exact capacity accounting, legal fixed/FLEX/SF coverage, per-position reference comparison, named scenario comparison and CSV export. Inputs start at zero. Saving requires a full legal roster; references are comparison ranges, not arbitrary forced quotas or membership labels. Context is isolated per league/settings/capacity/reference. Saved scenarios last for the app session only.
+
+Historical references remain intact. If a reference extends beyond capacity, the UI says so instead of clipping the research. Derived references are identified as estimates; their known methodological limitations are not solved by this UI. No new gray technical captions or directional-priority sentence is added to Roster Construction.
+
+Ten focused tests pass, including actual Streamlit AppTest edit/save/compare/league-switch flows. New app compiles. Live user screenshot review remains pending. Full implementation update: WORP_UPDATE_ROSTER_SCENARIOS_V0_9_4_7.md.
+
+Engine V0.2.1, Core research and Lineup Economics remain unchanged. This is a scenario editor, not the unresolved automatic full-roster recommender.
