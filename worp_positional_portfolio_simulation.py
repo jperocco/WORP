@@ -48,7 +48,7 @@ def evaluate(counts, tables, legal):
     return values.max(axis=1)
 
 
-def run(source, out, league_id, benches, draws):
+def run(source, out, league_id, benches, draws, lookback=3, seed=7000):
     manifest = pd.read_csv(source/'selected_league_seasons.csv', dtype={'league_id':str})
     league = manifest.set_index('league_id').loc[league_id]
     slots = [s for s in json.loads(league.roster_positions) if s != 'BN']
@@ -61,8 +61,8 @@ def run(source, out, league_id, benches, draws):
     for week in (4,8,12):
         snapshots = json.loads((source/'cache'/f'matchups_{league_id}_{week-1}.json').read_text())
         pool = set().union(*(set(s.get('players') or []) for s in snapshots))
-        prior = [outcomes[w] for w in range(week-3,week)]
-        rng = np.random.default_rng(7000+week)
+        prior = [outcomes[w] for w in range(1 if lookback == 0 else max(1,week-lookback),week)]
+        rng = np.random.default_rng(seed+week)
         selected = [profile_orders({pid for pid in pool if pmap.get(pid,{}).get('position') == pos},
                                    prior,int(league.total_rosters),max(capacities),draws,rng) for pos in POS]
         limits = [x.shape[1] for x in selected]
@@ -95,7 +95,8 @@ def run(source, out, league_id, benches, draws):
     print(best[['capacity','week']+list(POS)+['mean_opportunity']].to_string(index=False))
     (out/'assumptions.json').write_text(json.dumps(dict(league_id=league_id,season=int(league.season),
         teams=int(league.total_rosters),slots=slots,bench_scenarios=benches,draws=draws,windows=[4,8,12],
-        selection='prior-owned league pool, preceding 3-week signed WoRP rank blocks; one profile per team-sized block',
+        lookback=lookback,seed=seed,
+        selection='prior-owned league pool, preceding signed WoRP rank blocks; one profile per team-sized block; lookback=0 uses season to date',
         objective='4-week sum of positive WoRP in legal hindsight lineups; not joint win probability',
         status='modeled sensitivity scenarios; no product quotas'),indent=2)+'\n')
 
@@ -107,5 +108,7 @@ if __name__ == '__main__':
     p.add_argument('--league-id',default='1180084795436826624')
     p.add_argument('--benches',type=int,nargs='+',default=[5,12])
     p.add_argument('--draws',type=int,default=64)
+    p.add_argument('--lookback',type=int,default=3)
+    p.add_argument('--seed',type=int,default=7000)
     a=p.parse_args()
-    run(a.source,a.out,a.league_id,a.benches,a.draws)
+    run(a.source,a.out,a.league_id,a.benches,a.draws,a.lookback,a.seed)
