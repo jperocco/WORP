@@ -98,6 +98,25 @@ def score_stats_exact(stats, scoring_settings):
 
     return round(total, 6)
 
+
+def scoring_component_values(stats, scoring_settings):
+    """Return the scored contribution of every active Sleeper setting.
+
+    This is descriptive input for product explainers such as Scoring DNA.  It
+    deliberately uses the same native stat × setting contract as the fantasy
+    point total, and does not participate in WoRP calculation.
+    """
+    out = {}
+    for key, raw_weight in (scoring_settings or {}).items():
+        try:
+            weight = float(raw_weight)
+            value = float(stats.get(key, 0.0) or 0.0)
+        except (TypeError, ValueError):
+            continue
+        if weight:
+            out[f"component__{key}"] = round(value * weight, 6)
+    return out
+
 def fetch_week_stats(season, week):
     urls = [
         template.format(season=int(season), week=int(week))
@@ -148,7 +167,7 @@ def load_sleeper_player_weeks(
                     or pid
                 )
 
-                rows.append({
+                row = {
                     "season": int(season),
                     "season_type": "REG",
                     "week": int(week),
@@ -156,7 +175,9 @@ def load_sleeper_player_weeks(
                     "player_name": full_name,
                     "position": position,
                     "fantasy_points": score_stats_exact(stats, scoring_settings),
-                })
+                }
+                row.update(scoring_component_values(stats, scoring_settings))
+                rows.append(row)
 
     df = pd.DataFrame(rows)
 
