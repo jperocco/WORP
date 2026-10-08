@@ -293,6 +293,7 @@ def _season_ranking_cache_path(
 
 from worp_lineup_economics_v0_9_4 import build_lineup_scoring_share
 from worp_roster_construction_product_v0_9_4 import recover_v0_32_ranges, roster_construction_envelope, whole_roster_layers
+from worp_league_reading_v0_9_5 import build_league_reading
 
 @st.cache_data(show_spinner=False)
 def calculate_league_intelligence_cached(
@@ -2013,6 +2014,39 @@ else:
                 st.markdown(f"**{insight['title']}**  \n{insight['detail']}")
         else:
             st.caption("No Structural Insights available for this curve.")
+
+        st.markdown("##### League Reading Model")
+        st.caption(
+            "Curve → interpositional leverage → contender role architecture. "
+            "This is a structural reading layer: it does not project players, set trade prices, or impose exact roster quotas."
+        )
+        try:
+            reading = build_league_reading(
+                st.session_state["league_curve"].copy(),
+                teams=int(league.get("total_rosters", 0) or 0),
+                qb=int(counts.get("QB", 0)), rb=int(counts.get("RB", 0)),
+                wr=int(counts.get("WR", 0)), te=int(counts.get("TE", 0)),
+                flex=int(counts.get("FLEX", 0)), superflex=int(counts.get("SUPER_FLEX", 0)),
+                scoring=league.get("scoring_settings", {}) or {},
+            )
+            st.markdown(f"**{reading['headline']}**  \n{reading['thesis']}")
+            metric_a, metric_b, metric_c = st.columns(3)
+            metric_a.metric("Start", reading["start_n"])
+            metric_b.metric("RB vs WR elite edge", f"{reading['elite_rb_wr_edge']:+.2f} WoRP")
+            metric_c.metric("Median RB → WR rank gap", f"{reading['median_rb_wr_rank_gap']:+.0f} ranks")
+
+            if not reading["equivalences"].empty:
+                st.markdown("**Shared-FLEX equivalences**")
+                eq_view = reading["equivalences"].copy()
+                for col in ("RB WoRP", "WR WoRP", "TE WoRP"):
+                    if col in eq_view:
+                        eq_view[col] = eq_view[col].round(2)
+                st.dataframe(eq_view, hide_index=True, width="stretch")
+
+            st.markdown("**Contender role architecture**")
+            st.dataframe(reading["blueprint"], hide_index=True, width="stretch")
+        except Exception as exc:
+            st.caption(f"League Reading Model unavailable: {exc}")
 
         st.markdown("##### Value Cliffs")
         st.caption("Where does waiting a few ranks cost the most WoRP? The five insights summarize; this table lets you inspect the marginal delta.")
