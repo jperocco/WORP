@@ -58,6 +58,16 @@ python test_empirical_win_model.py
 python test_regular_season_filter.py
 ```
 
+## Publicação segura
+
+Para publicar uma atualização já pronta, use:
+
+```bash
+bash scripts/publish_main.sh
+```
+
+Ele interrompe a publicação se houver arquivos soltos, se a cópia local estiver atrás do GitHub ou se algum teste falhar. Não troca de versão, não força publicação e não mexe no atalho do app.
+
 ## Real 2025 demo
 
 ```bash
