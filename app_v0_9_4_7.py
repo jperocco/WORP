@@ -59,7 +59,7 @@ def format_counts(roster_positions):
 def league_format_label(league):
     c = format_counts(league.get("roster_positions", []))
     pieces = [f"{league.get('total_rosters', '?')}T"]
-    for key, label in [("QB","QB"),("RB","RB"),("WR","WR"),("TE","TE"),("FLEX","FLEX"),("SUPER_FLEX","SF")]:
+    for key, label in [("QB","QB"),("RB","RB"),("WR","WR"),("TE","TE"),("WRRB_FLEX","RB/WR FLEX"),("FLEX","FLEX"),("SUPER_FLEX","SF")]:
         if c.get(key):
             pieces.append(f"{c[key]}{label}")
     return " · ".join(pieces)
@@ -91,7 +91,7 @@ def build_three_year_curve(df, seasons=(2023, 2024, 2025), top_n=50):
 history, history_source = load_history()
 
 st.title("WoRP Lab")
-st.caption("USER → LEAGUE → GRAPH · Engine V0.2.1 frozen · UI V0.9.4.7")
+st.caption("USER → LEAGUE → GRAPH · WoRP math unchanged · Slot eligibility V0.2.2 · UI V0.9.4.7")
 
 with st.sidebar:
     st.header("Sleeper")
@@ -269,18 +269,19 @@ def load_scored_history_cached(seasons, scoring_json):
     return all_weeks, endpoint_log
 
 
-ENGINE_CACHE_VERSION = "worp_engine_v0_2_1"
-ENGINE_CACHE_DIR = Path.home() / ".worp_lab" / "season_rankings_v0_2_1"
+ENGINE_CACHE_VERSION = "worp_engine_v0_2_2_slot_eligibility"
+ENGINE_CACHE_DIR = Path.home() / ".worp_lab" / "season_rankings_v0_2_2"
 
 
 def _season_ranking_cache_path(
     teams, qb, rb, wr, te, flex, superflex, scoring_json,
-    season, n_sims, seed, replacement_band=6,
+    season, n_sims, seed, replacement_band=6, rbwr_flex=0,
 ):
     payload = {
         "engine": ENGINE_CACHE_VERSION,
         "teams": int(teams), "qb": int(qb), "rb": int(rb), "wr": int(wr),
         "te": int(te), "flex": int(flex), "superflex": int(superflex),
+        "rbwr_flex": int(rbwr_flex),
         "scoring_json": scoring_json,
         "season": int(season), "n_sims": int(n_sims), "seed": int(seed),
         "replacement_band": int(replacement_band),
@@ -298,7 +299,7 @@ from worp_league_reading_v0_9_5 import build_league_reading
 @st.cache_data(show_spinner=False)
 def calculate_league_intelligence_cached(
     teams, qb, rb, wr, te, flex, superflex, scoring_json,
-    seasons=(2023, 2024, 2025), n_sims=4000, seed=7
+    seasons=(2023, 2024, 2025), n_sims=4000, seed=7, rbwr_flex=0
 ):
     from worp_engine import LeagueSettings, calculate_season_worp
     t_calc0 = time.perf_counter()
@@ -313,6 +314,7 @@ def calculate_league_intelligence_cached(
         te=int(te),
         flex=int(flex),
         superflex=int(superflex),
+        rbwr_flex=int(rbwr_flex),
         ppr=float(sc.get("rec", 0.0)),
         te_premium=float(sc.get("bonus_rec_te", 0.0)),
     )
@@ -327,6 +329,7 @@ def calculate_league_intelligence_cached(
         cache_paths[int(season_i)] = _season_ranking_cache_path(
             teams, qb, rb, wr, te, flex, superflex, scoring_json,
             int(season_i), int(n_sims), int(seed), replacement_band=6,
+            rbwr_flex=int(rbwr_flex),
         )
 
     missing_seasons = []
@@ -1793,6 +1796,9 @@ def calculate_league_intelligence_cached(
 
 calc_key = (
     league.get("league_id"),
+    tuple(sorted(counts.items())),
+    tuple(league.get("roster_positions", []) or []),
+    json.dumps(league.get("scoring_settings", {}) or {}, sort_keys=True),
     selected_seasons,
     int(n_sims_ui),
 )
@@ -1826,6 +1832,7 @@ if compute:
                 scoring_json,
                 seasons=selected_seasons,
                 n_sims=int(n_sims_ui),
+                rbwr_flex=counts.get("WRRB_FLEX", 0),
             )
 
             st.session_state["worp_result_key"] = calc_key
@@ -2028,6 +2035,7 @@ else:
                 wr=int(counts.get("WR", 0)), te=int(counts.get("TE", 0)),
                 flex=int(counts.get("FLEX", 0)), superflex=int(counts.get("SUPER_FLEX", 0)),
                 scoring=league.get("scoring_settings", {}) or {},
+                rbwr_flex=int(counts.get("WRRB_FLEX", 0)),
             )
             st.markdown(f"**{reading['headline']}**  \n{reading['thesis']}")
             metric_a, metric_b, metric_c = st.columns(3)
@@ -2062,17 +2070,17 @@ else:
 
         _teams=int(league.get("total_rosters",0) or 0)
         _qb=int(counts.get("QB",0)); _rb=int(counts.get("RB",0)); _wr=int(counts.get("WR",0)); _te=int(counts.get("TE",0))
-        _flex=int(counts.get("FLEX",0)); _superflex=int(counts.get("SUPER_FLEX",0)); _sc=league.get("scoring_settings",{}) or {}
+        _flex=int(counts.get("FLEX",0)); _superflex=int(counts.get("SUPER_FLEX",0)); _rbwr_flex=int(counts.get("WRRB_FLEX",0)); _sc=league.get("scoring_settings",{}) or {}
 
         st.markdown("##### Lineup Economics")
         st.caption("How much of this league's expected starting-lineup scoring comes from each slot — and which positions fill flexible slots.")
         try:
             _pw,_ = load_sleeper_player_weeks([2023,2024,2025], _sc, player_map=fetch_player_map())
-            lineup_rows=build_lineup_scoring_share(_pw,_teams,_qb,_rb,_wr,_te,_flex,_superflex)
+            lineup_rows=build_lineup_scoring_share(_pw,_teams,_qb,_rb,_wr,_te,_flex,_superflex,_rbwr_flex)
             cards=[]
             for lr in lineup_rows:
                 occ=lr['occupancy']
-                is_flexible=lr['slot'].startswith('FLEX') or lr['slot'].startswith('SUPER_FLEX')
+                is_flexible=lr['slot'].startswith('FLEX') or lr['slot'].startswith('SUPER_FLEX') or lr['slot'].startswith('WRRB_FLEX')
                 mix=(''.join(f'<span>{p} {100*v:.0f}%</span>' for p,v in sorted(occ.items(),key=lambda kv:kv[1],reverse=True) if v>=0.005) if is_flexible else '')
                 cards.append(
                     f'<div class="ls-card"><div class="ls-slot">{lr["slot"]}</div>'
