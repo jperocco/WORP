@@ -64,6 +64,7 @@ def build_league_reading(
     flex: int,
     superflex: int,
     scoring: dict | None = None,
+    rbwr_flex: int = 0,
 ) -> dict:
     """Return a transparent league-reading model from an existing WoRP curve.
 
@@ -105,30 +106,31 @@ def build_league_reading(
     elite_edge = sum(elite_deltas) / len(elite_deltas) if elite_deltas else 0.0
     median_gap = float(pd.Series(rb_wr_gaps).median()) if rb_wr_gaps else 0.0
 
+    restricted_flex = int(rbwr_flex)
     rb_led = (
-        int(flex) >= 2
+        (int(flex) + restricted_flex) >= 2
         and len(rb_wr_gaps) >= 2
         and median_gap >= 5
         and elite_edge > 0
     )
     tep = float(scoring.get("bonus_rec_te", 0.0) or 0.0) > 0
-    start_n = int(qb) + int(rb) + int(wr) + int(te) + int(flex) + int(superflex)
+    start_n = int(qb) + int(rb) + int(wr) + int(te) + int(flex) + restricted_flex + int(superflex)
 
     if rb_led:
-        headline = "RB-led shared-FLEX economy"
+        headline = "RB-led RB/WR-constrained FLEX economy" if restricted_flex else "RB-led shared-FLEX economy"
         thesis = (
-            "RB holds its advantage at the top and through the shared-FLEX range. "
+            "RB holds its advantage at the top and through the RB/WR competition for flexible lineup capacity. "
             "Build enough usable RB roles to win flexible slots; do not spend the next "
             "valuable roster spot on a marginal WR merely because WR is a fixed slot."
         )
         rb_detail = (
-            f"{int(rb)} fixed RB slot{'s' if int(rb) != 1 else ''} + two FLEX-winning RB roles + one resilience role. "
+            f"{int(rb)} fixed RB slot{'s' if int(rb) != 1 else ''} + {restricted_flex} RB/WR-only flex slot{'s' if restricted_flex != 1 else ''} in the lineup + two FLEX-winning RB roles + one resilience role. "
             "These are role targets, not a six-RB quota."
         )
     else:
-        headline = "Shared-FLEX economy without a proven RB override"
+        headline = "RB/WR-constrained plus shared-FLEX economy" if restricted_flex else "Shared-FLEX economy without a proven RB override"
         thesis = (
-            "FLEX capacity creates shared RB/WR/TE demand, but this curve does not show "
+            "Flexible lineup capacity creates RB/WR demand in restricted slots and RB/WR/TE demand in shared slots, but this curve does not show "
             "enough RB-over-WR separation to hard-code the next roster spot as RB."
         )
         rb_detail = (
