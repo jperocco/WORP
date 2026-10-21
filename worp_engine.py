@@ -20,6 +20,7 @@ class LeagueSettings:
     superflex: int = 1
     ppr: float = 0.5
     te_premium: float = 0.0
+    rbwr_flex: int = 0
 
     @property
     def fixed_slots(self) -> Dict[str, int]:
@@ -33,6 +34,10 @@ class LeagueSettings:
     @property
     def flex_slots(self) -> int:
         return self.teams * self.flex
+
+    @property
+    def rbwr_flex_slots(self) -> int:
+        return self.teams * self.rbwr_flex
 
     @property
     def sf_slots(self) -> int:
@@ -85,13 +90,11 @@ def _take_top(pool: pd.DataFrame, n: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def select_aggregate_starters(week_df: pd.DataFrame, settings: LeagueSettings) -> pd.DataFrame:
-    """Select a league-wide starter-level pool that maximizes weekly fantasy points.
+    """Select aggregate starters while preserving each slot's eligibility.
 
-    Fixed positional slots are filled first. Remaining FLEX + SF slots are solved
-    jointly by enumerating how many SF slots go to QBs; the remaining open slots
-    are filled by the best remaining RB/WR/TE scores.
-
-    This is an aggregate scarcity model, not a reconstruction of actual rosters.
+    Fixed positions are filled first, then restricted RB/WR FLEX slots, then
+    shared FLEX and Superflex are jointly optimized. This is a league-wide
+    scarcity model, not a reconstruction of individual rosters.
     """
     df = week_df.copy()
     df["position"] = df["position"].astype(str).str.upper()
@@ -101,16 +104,22 @@ def select_aggregate_starters(week_df: pd.DataFrame, settings: LeagueSettings) -
     fixed_parts = []
     remaining_parts = []
     for pos, n in settings.fixed_slots.items():
-        p = df[df.position.eq(pos)].copy()
-        chosen, rem = _take_top(p, n)
+        chosen, rem = _take_top(df[df.position.eq(pos)].copy(), n)
         fixed_parts.append(chosen)
         remaining_parts.append(rem)
 
     fixed = pd.concat(fixed_parts, ignore_index=False) if fixed_parts else df.iloc[0:0]
     rem = pd.concat(remaining_parts, ignore_index=False) if remaining_parts else df.iloc[0:0]
 
-    rem_qb = rem[rem.position.eq("QB")].sort_values("fantasy_points", ascending=False)
-    rem_rwt = rem[rem.position.isin(FLEX_ELIGIBLE)].sort_values("fantasy_points", ascending=False)
+    # WRRB_FLEX accepts only RB/WR. Fill it before shared FLEX so TE can never
+    # consume a restricted slot. Remove chosen players before solving remaining
+    # flexible slots to avoid double-counting.
+    rbwr_pool = rem[rem.position.isin(("RB", "WR"))].sort_values("fantasy_points", ascending=False, kind="mergesort")
+    rbwr_pick = rbwr_pool.head(settings.rbwr_flex_slots)
+    rem = rem.loc[~rem.index.isin(rbwr_pick.index)].copy()
+
+    rem_qb = rem[rem.position.eq("QB")].sort_values("fantasy_points", ascending=False, kind="mergesort")
+    rem_rwt = rem[rem.position.isin(FLEX_ELIGIBLE)].sort_values("fantasy_points", ascending=False, kind="mergesort")
 
     flex_n = settings.flex_slots
     sf_n = settings.sf_slots
@@ -133,10 +142,9 @@ def select_aggregate_starters(week_df: pd.DataFrame, settings: LeagueSettings) -
     else:
         _, qb_pick, rwt_pick = best
 
-    starters = pd.concat([fixed, qb_pick, rwt_pick], ignore_index=False).copy()
+    starters = pd.concat([fixed, rbwr_pick, qb_pick, rwt_pick], ignore_index=False).copy()
     starters = starters.loc[~starters.index.duplicated(keep="first")]
     return starters
-
 
 def replacement_levels(
     week_df: pd.DataFrame,
@@ -182,6 +190,7 @@ def _starter_sampling_pools(starters: pd.DataFrame) -> Dict[str, np.ndarray]:
         pos: s[s.position.eq(pos)].fantasy_points.to_numpy(dtype=float)
         for pos in ["QB", "RB", "WR", "TE"]
     }
+    pools["RBWR_FLEX"] = s[s.position.isin(("RB", "WR"))].fantasy_points.to_numpy(dtype=float)
     pools["FLEX"] = s[s.position.isin(FLEX_ELIGIBLE)].fantasy_points.to_numpy(dtype=float)
     pools["SF"] = s[s.position.isin(SF_ELIGIBLE)].fantasy_points.to_numpy(dtype=float)
     return pools
@@ -218,6 +227,7 @@ def simulate_full_team_scores(
     totals += _sample_pool_sum(rng, pools["RB"], n_sims, settings.rb)
     totals += _sample_pool_sum(rng, pools["WR"], n_sims, settings.wr)
     totals += _sample_pool_sum(rng, pools["TE"], n_sims, settings.te)
+    totals += _sample_pool_sum(rng, pools["RBWR_FLEX"], n_sims, settings.rbwr_flex)
     totals += _sample_pool_sum(rng, pools["FLEX"], n_sims, settings.flex)
     totals += _sample_pool_sum(rng, pools["SF"], n_sims, settings.superflex)
     return totals
@@ -230,12 +240,7 @@ def simulate_other_roster_scores(
     n_sims: int = 8000,
     seed: int = 7,
 ) -> np.ndarray:
-    """Simulate the rest of a roster while leaving one slot for `position` empty.
-
-    Prefer removing a fixed slot of that position. If a format has zero fixed
-    slots at that position, remove an eligible FLEX slot (RB/WR/TE), then an
-    eligible Superflex slot as a final fallback.
-    """
+    """Simulate the rest of a roster while leaving one eligible slot empty."""
     position = str(position).upper()
     rng = np.random.default_rng(seed)
     pools = _starter_sampling_pools(starters)
@@ -245,12 +250,15 @@ def simulate_other_roster_scores(
         "RB": settings.rb,
         "WR": settings.wr,
         "TE": settings.te,
+        "RBWR_FLEX": settings.rbwr_flex,
         "FLEX": settings.flex,
         "SF": settings.superflex,
     }
 
     if counts.get(position, 0) > 0:
         counts[position] -= 1
+    elif position in ("RB", "WR") and counts["RBWR_FLEX"] > 0:
+        counts["RBWR_FLEX"] -= 1
     elif position in FLEX_ELIGIBLE and counts["FLEX"] > 0:
         counts["FLEX"] -= 1
     elif position in SF_ELIGIBLE and counts["SF"] > 0:
@@ -259,10 +267,9 @@ def simulate_other_roster_scores(
         raise ValueError(f"League format has no slot eligible for position {position}")
 
     totals = np.zeros(n_sims, dtype=float)
-    for slot in ["QB", "RB", "WR", "TE", "FLEX", "SF"]:
+    for slot in ["QB", "RB", "WR", "TE", "RBWR_FLEX", "FLEX", "SF"]:
         totals += _sample_pool_sum(rng, pools[slot], n_sims, counts[slot])
     return totals
-
 
 def _empirical_win_probability(own_scores: np.ndarray, opponent_scores_sorted: np.ndarray) -> float:
     """Expected head-to-head win probability against an empirical opponent sample.

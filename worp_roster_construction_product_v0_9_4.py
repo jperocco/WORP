@@ -63,14 +63,18 @@ def recover_v0_32_ranges(product_ranges=None, v0_24_envelopes=None):
     return pd.DataFrame(rows)
 
 
-def format_key(teams, qb, rb, wr, te, flex, superflex, tep=False):
-    start_n = sum(map(int, (qb, rb, wr, te, flex, superflex)))
-    return "|".join((
+def format_key(teams, qb, rb, wr, te, flex, superflex, tep=False, rbwr_flex=0):
+    start_n = sum(map(int, (qb, rb, wr, te, flex, superflex, rbwr_flex)))
+    parts = [
         f"{int(teams)}T", "SF" if int(superflex) > 0 else "1QB",
         f"Start{start_n}", f"QB{int(qb)}", f"RB{int(rb)}",
         f"WR{int(wr)}", f"TE{int(te)}", f"FLEX{int(flex)}",
-        f"SFLEX{int(superflex)}", "TEP" if bool(tep) else "noTEP",
-    ))
+    ]
+    # Preserve legacy historical keys when no restricted slot exists.
+    if int(rbwr_flex):
+        parts.append(f"RBFLEX{int(rbwr_flex)}")
+    parts.extend((f"SFLEX{int(superflex)}", "TEP" if bool(tep) else "noTEP"))
+    return "|".join(parts)
 
 
 def _canonical_format_key(value):
@@ -81,24 +85,31 @@ def _canonical_format_key(value):
     return "|".join(parts)
 
 
-def _can_fill(counts, fixed, flex, superflex):
+def _can_fill(counts, fixed, flex, superflex, rbwr_flex=0):
     if any(counts[p] < fixed[p] for p in POSITIONS):
         return False
     remaining = {p: counts[p] - fixed[p] for p in POSITIONS}
 
-    for flex_rb in range(flex + 1):
-        for flex_wr in range(flex - flex_rb + 1):
-            flex_te = flex - flex_rb - flex_wr
-            flex_need = {"RB": flex_rb, "WR": flex_wr, "TE": flex_te}
-            if any(remaining[p] < flex_need[p] for p in ("RB", "WR", "TE")):
-                continue
-            after_flex = remaining.copy()
-            for p in ("RB", "WR", "TE"):
-                after_flex[p] -= flex_need[p]
-            if sum(after_flex.values()) >= superflex:
-                return True
+    # First allocate restricted RB/WR slots, then shared FLEX, then SF.
+    for restricted_rb in range(rbwr_flex + 1):
+        restricted_wr = rbwr_flex - restricted_rb
+        if remaining["RB"] < restricted_rb or remaining["WR"] < restricted_wr:
+            continue
+        after_restricted = remaining.copy()
+        after_restricted["RB"] -= restricted_rb
+        after_restricted["WR"] -= restricted_wr
+        for flex_rb in range(flex + 1):
+            for flex_wr in range(flex - flex_rb + 1):
+                flex_te = flex - flex_rb - flex_wr
+                flex_need = {"RB": flex_rb, "WR": flex_wr, "TE": flex_te}
+                if any(after_restricted[p] < flex_need[p] for p in ("RB", "WR", "TE")):
+                    continue
+                after_flex = after_restricted.copy()
+                for p in ("RB", "WR", "TE"):
+                    after_flex[p] -= flex_need[p]
+                if sum(after_flex.values()) >= superflex:
+                    return True
     return False
-
 
 def _last_positive_rank(curve, position):
     x = curve[curve["position"].eq(position)].copy()
@@ -142,6 +153,7 @@ def derive_league_native_envelope(
     flex,
     superflex,
     active_roster_size,
+    rbwr_flex=0,
 ):
     """Derive a lower-confidence envelope from this league's own economy.
 
@@ -160,8 +172,8 @@ def derive_league_native_envelope(
     if teams <= 0:
         raise ValueError("Roster Construction requires a positive team count.")
     fixed = {"QB": int(qb), "RB": int(rb), "WR": int(wr), "TE": int(te)}
-    flex, superflex = int(flex), int(superflex)
-    start_n = sum(fixed.values()) + flex + superflex
+    flex, superflex, rbwr_flex = int(flex), int(superflex), int(rbwr_flex)
+    start_n = sum(fixed.values()) + flex + superflex + rbwr_flex
     active_roster_size = max(start_n, int(active_roster_size))
 
     frontier = {p: _last_positive_rank(curve, p) for p in POSITIONS}
@@ -172,8 +184,9 @@ def derive_league_native_envelope(
         for p in POSITIONS
     }
     caps["QB"] = max(caps["QB"], fixed["QB"] + superflex)
-    for p in ("RB", "WR", "TE"):
-        caps[p] = max(caps[p], fixed[p] + flex + superflex)
+    caps["RB"] = max(caps["RB"], fixed["RB"] + flex + superflex + rbwr_flex)
+    caps["WR"] = max(caps["WR"], fixed["WR"] + flex + superflex + rbwr_flex)
+    caps["TE"] = max(caps["TE"], fixed["TE"] + flex + superflex)
 
     feasible = []
     ranges = [range(fixed[p], caps[p] + 1) for p in POSITIONS]
@@ -182,7 +195,7 @@ def derive_league_native_envelope(
         total = sum(values)
         if total > active_roster_size:
             continue
-        if _can_fill(counts, fixed, flex, superflex):
+        if _can_fill(counts, fixed, flex, superflex, rbwr_flex):
             feasible.append((total, counts))
     if not feasible:
         raise ValueError("No legal Scoring Core construction for this league format.")
@@ -246,8 +259,9 @@ def roster_construction_envelope(
     superflex,
     active_roster_size,
     tep=False,
+    rbwr_flex=0,
 ):
-    key = format_key(teams, qb, rb, wr, te, flex, superflex, tep=tep)
+    key = format_key(teams, qb, rb, wr, te, flex, superflex, tep=tep, rbwr_flex=rbwr_flex)
     if historical_ranges is not None and not historical_ranges.empty:
         hit = historical_ranges[
             historical_ranges["format_key"].map(_canonical_format_key).eq(key)
@@ -276,6 +290,7 @@ def roster_construction_envelope(
         flex=flex,
         superflex=superflex,
         active_roster_size=active_roster_size,
+        rbwr_flex=rbwr_flex,
     )
     result["format_key"] = key
     return result

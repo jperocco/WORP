@@ -12,14 +12,23 @@ def evaluate_scenario(core, extra, capacity, slots, envelope):
             raise ValueError('Use non-negative whole numbers for all four positions.')
     if isinstance(capacity,bool) or not isinstance(capacity,Integral) or capacity < 0:
         raise ValueError('Invalid active-roster capacity.')
-    unsupported=set(slots)-set(POSITIONS)-{'FLEX','SUPER_FLEX','BN','BENCH','IR','TAXI'}
+    unsupported=set(slots)-set(POSITIONS)-{'FLEX','WRRB_FLEX','SUPER_FLEX','BN','BENCH','IR','TAXI'}
     total={p:int(core[p]+extra[p]) for p in POSITIONS}
     core_n=sum(core.values());extra_n=sum(extra.values());allocated=core_n+extra_n
     fixed={p:slots.count(p) for p in POSITIONS}
     remaining={p:total[p]-fixed[p] for p in POSITIONS}
+    rbwr_n=slots.count('WRRB_FLEX')
+    flex_n=slots.count('FLEX')
+    sf_n=slots.count('SUPER_FLEX')
+    # Restricted RB/WR vacancies are allocated first. Then shared FLEX needs
+    # RB/WR/TE, and only after those constraints are met may SF use any position.
+    rbwr_available=remaining['RB']+remaining['WR']
+    flex_eligible=remaining['RB']+remaining['WR']+remaining['TE']
+    total_remaining=sum(remaining.values())
     can_start=(not unsupported and all(v>=0 for v in remaining.values())
-               and sum(remaining[p] for p in ('RB','WR','TE'))>=slots.count('FLEX')
-               and sum(remaining.values())>=slots.count('FLEX')+slots.count('SUPER_FLEX'))
+               and rbwr_available>=rbwr_n
+               and flex_eligible>=rbwr_n+flex_n
+               and total_remaining>=rbwr_n+flex_n+sf_n)
     checks=[]
     for p in POSITIONS:
         lo,hi=int(envelope[p+'_low']),int(envelope[p+'_high'])
@@ -75,7 +84,7 @@ def render_roster_scenarios(envelope,capacity,slots,league_id,scoring):
     if result['unsupported']:
         st.warning('This editor cannot check these starting slots: '+', '.join(result['unsupported']))
     elif result['complete'] and not result['can_start']:
-        st.warning('This distribution cannot fill every starting slot. Adjust the positional counts, including FLEX/SF eligibility.')
+        st.warning('This distribution cannot fill every starting slot. Adjust the positional counts, including WRRB_FLEX, FLEX and SF eligibility.')
     if result['core']:
         st.write(f"With {result['core']} Scoring places, this roster has {result['extra_budget']} places left for optionality.")
         if not result['core_in_range']:

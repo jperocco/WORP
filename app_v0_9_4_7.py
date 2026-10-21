@@ -59,7 +59,7 @@ def format_counts(roster_positions):
 def league_format_label(league):
     c = format_counts(league.get("roster_positions", []))
     pieces = [f"{league.get('total_rosters', '?')}T"]
-    for key, label in [("QB","QB"),("RB","RB"),("WR","WR"),("TE","TE"),("FLEX","FLEX"),("SUPER_FLEX","SF")]:
+    for key, label in [("QB","QB"),("RB","RB"),("WR","WR"),("TE","TE"),("WRRB_FLEX","RB/WR FLEX"),("FLEX","FLEX"),("SUPER_FLEX","SF")]:
         if c.get(key):
             pieces.append(f"{c[key]}{label}")
     return " · ".join(pieces)
@@ -91,7 +91,7 @@ def build_three_year_curve(df, seasons=(2023, 2024, 2025), top_n=50):
 history, history_source = load_history()
 
 st.title("WoRP Lab")
-st.caption("USER → LEAGUE → GRAPH · Engine V0.2.1 frozen · UI V0.9.4.7")
+st.caption("USER → LEAGUE → GRAPH · WoRP math unchanged · Slot eligibility V0.2.2 · UI V0.9.4.7")
 
 with st.sidebar:
     st.header("Sleeper")
@@ -165,12 +165,13 @@ league = league_map[choice]
 st.subheader(league.get("name", "League"))
 st.caption(league_format_label(league) + " · " + scoring_summary(league.get("scoring_settings", {})))
 
-a,b,c,d = st.columns(4)
+a,b,c,d,e = st.columns(5)
 a.metric("Teams", league.get("total_rosters", "—"))
 counts = format_counts(league.get("roster_positions", []))
 b.metric("Starters", sum(v for k,v in counts.items() if k not in {"BN","IR","TAXI"}))
 c.metric("Superflex", counts.get("SUPER_FLEX", 0))
 d.metric("TE starters", counts.get("TE", 0))
+e.metric("RB/WR FLEX", counts.get("WRRB_FLEX", 0))
 
 with st.expander("Detected league settings"):
     st.write("Roster positions:", league.get("roster_positions", []))
@@ -209,8 +210,8 @@ st.success(
 )
 
 st.caption(
-    "Exact Sleeper scoring → frozen WoRP Engine V0.2.1 → league-specific "
-    "historical positional curve and observed player board."
+    "Exact Sleeper scoring → unchanged WoRP math with corrected slot eligibility → "
+    "league-specific historical positional curve and observed player board."
 )
 
 control_a, control_b, control_c = st.columns([1.4, 1, 1])
@@ -269,18 +270,19 @@ def load_scored_history_cached(seasons, scoring_json):
     return all_weeks, endpoint_log
 
 
-ENGINE_CACHE_VERSION = "worp_engine_v0_2_1"
-ENGINE_CACHE_DIR = Path.home() / ".worp_lab" / "season_rankings_v0_2_1"
+ENGINE_CACHE_VERSION = "worp_engine_v0_2_2_slot_eligibility"
+ENGINE_CACHE_DIR = Path.home() / ".worp_lab" / "season_rankings_v0_2_2"
 
 
 def _season_ranking_cache_path(
     teams, qb, rb, wr, te, flex, superflex, scoring_json,
-    season, n_sims, seed, replacement_band=6,
+    season, n_sims, seed, replacement_band=6, rbwr_flex=0,
 ):
     payload = {
         "engine": ENGINE_CACHE_VERSION,
         "teams": int(teams), "qb": int(qb), "rb": int(rb), "wr": int(wr),
         "te": int(te), "flex": int(flex), "superflex": int(superflex),
+        "rbwr_flex": int(rbwr_flex),
         "scoring_json": scoring_json,
         "season": int(season), "n_sims": int(n_sims), "seed": int(seed),
         "replacement_band": int(replacement_band),
@@ -298,7 +300,7 @@ from worp_league_reading_v0_9_5 import build_league_reading
 @st.cache_data(show_spinner=False)
 def calculate_league_intelligence_cached(
     teams, qb, rb, wr, te, flex, superflex, scoring_json,
-    seasons=(2023, 2024, 2025), n_sims=4000, seed=7
+    seasons=(2023, 2024, 2025), n_sims=4000, seed=7, rbwr_flex=0
 ):
     from worp_engine import LeagueSettings, calculate_season_worp
     t_calc0 = time.perf_counter()
@@ -313,6 +315,7 @@ def calculate_league_intelligence_cached(
         te=int(te),
         flex=int(flex),
         superflex=int(superflex),
+        rbwr_flex=int(rbwr_flex),
         ppr=float(sc.get("rec", 0.0)),
         te_premium=float(sc.get("bonus_rec_te", 0.0)),
     )
@@ -327,6 +330,7 @@ def calculate_league_intelligence_cached(
         cache_paths[int(season_i)] = _season_ranking_cache_path(
             teams, qb, rb, wr, te, flex, superflex, scoring_json,
             int(season_i), int(n_sims), int(seed), replacement_band=6,
+            rbwr_flex=int(rbwr_flex),
         )
 
     missing_seasons = []
@@ -696,22 +700,26 @@ def calculate_league_intelligence_cached(
     # STORY E — FLEX ABSORPTION OF RB/WR/TE DEPTH
     # This is the first roster-utilization bridge, but deliberately limited to
     # legal capacity. It does NOT claim observed lineup capture or manager behavior.
-    if int(flex) >= 3:
+    if int(flex) + int(rbwr_flex) >= 3:
         wr_f, rb_f, te_f = _frontier_rank("WR"), _frontier_rank("RB"), _frontier_rank("TE")
         if wr_f is not None and rb_f is not None:
-            flexible_capacity = int(flex)
+            flexible_capacity = int(flex) + int(rbwr_flex)
+            shared_capacity = int(flex)
+            restricted_capacity = int(rbwr_flex)
             deeper_pos, deeper_f = ("WR", wr_f) if wr_f >= rb_f else ("RB", rb_f)
             _add_story(
                 "flex_depth_absorption", "lineup_capacity", deeper_pos,
                 2.75 + min(flexible_capacity, 8) * 0.10,
                 "This lineup can turn skill-position depth into starters",
                 (
-                    f"Each team has {flexible_capacity} RB/WR/TE-eligible FLEX slot{'s' if flexible_capacity != 1 else ''}. "
+                    f"Each team has {restricted_capacity} RB/WR-only flexible slot{'s' if restricted_capacity != 1 else ''} "
+                    f"and {shared_capacity} RB/WR/TE-eligible FLEX slot{'s' if shared_capacity != 1 else ''}. "
                     f"Historical replacement reaches roughly WR{wr_f} and RB{rb_f}. "
                     "In this format, useful skill-position depth has more paths into the starting lineup instead of being automatically treated as bench depth."
                 ),
                 1.15, 1.20, 1.35,
-                {"flex_per_team": flexible_capacity, "wr_frontier": wr_f,
+                {"flex_per_team": flexible_capacity, "shared_flex_per_team": shared_capacity,
+                 "rbwr_flex_per_team": restricted_capacity, "wr_frontier": wr_f,
                  "rb_frontier": rb_f, "te_frontier": te_f},
             )
 
@@ -875,11 +883,12 @@ def calculate_league_intelligence_cached(
             ]
 
     # 2) FLEX INTERPOSITIONAL PREFERENCE
-    # Compare RB/WR/TE at several same-rank anchors inside the shared relevant
-    # pool. Require a stable winner, not a single-rank accident.
-    if int(flex) > 0:
+    # Compare positions only where the format allows them to compete: RB/WR/TE
+    # in shared FLEX, or RB/WR in restricted WRRB_FLEX. Require a stable winner.
+    if int(flex) + int(rbwr_flex) > 0:
         flex_positions = []
-        for pos in ["RB", "WR", "TE"]:
+        eligible_flex_positions = ["RB", "WR", "TE"] if int(flex) > 0 else ["RB", "WR"]
+        for pos in eligible_flex_positions:
             f = _frontier_rank(pos)
             if f is not None and f >= 12:
                 flex_positions.append((pos, f))
@@ -926,7 +935,7 @@ def calculate_league_intelligence_cached(
                     _add_story(
                         "crosspos_flex_preference", "cross_position", flex_win,
                         4.10 + min(flex_edge, 0.8),
-                        f"For comparable FLEX-range assets, lean {flex_win} over {flex_second}",
+                        f"For comparable flexible-slot assets, lean {flex_win} over {flex_second}",
                         (
                             f"At shared rank checkpoints ({rank_text}), {flex_win} leads the eligible skill positions in "
                             f"{stable_wins} of {len(anchors)} comparisons and averages about {flex_edge:.2f} more WoRP than {flex_second}. "
@@ -975,8 +984,8 @@ def calculate_league_intelligence_cached(
     # Search FLEX-compatible skill positions for the strongest economically useful
     # rank equivalence. Stay before replacement and away from near-zero tail noise.
     equivalence_candidates = []
-    if int(flex) > 0:
-        skill_positions = ["RB", "WR", "TE"]
+    if int(flex) + int(rbwr_flex) > 0:
+        skill_positions = ["RB", "WR", "TE"] if int(flex) > 0 else ["RB", "WR"]
         for target_pos in skill_positions:
             target_frontier = _frontier_rank(target_pos)
             if target_frontier is None:
@@ -1127,11 +1136,11 @@ def calculate_league_intelligence_cached(
         )
         c["score"] = float(c.get("score", 0.0)) + relevance * 0.55 + min(gap, 20.0) * 0.01
 
-    # Build a specifically RB-vs-WR equivalence candidate when both positions
-    # share FLEX eligibility and a material cross-rank equivalence exists. This
+    # Build an RB-vs-WR equivalence candidate when both positions share flexible
+    # slot eligibility and a material cross-rank equivalence exists. This
     # prevents a larger but less recurrent RB-vs-TE rank gap from monopolizing
     # the equivalence slot merely because the number is bigger.
-    if int(flex) > 0:
+    if int(flex) + int(rbwr_flex) > 0:
         rb_f = _frontier_rank("RB")
         wr_f = _frontier_rank("WR")
         if rb_f is not None and wr_f is not None:
@@ -1171,14 +1180,14 @@ def calculate_league_intelligence_cached(
                     (
                         f"RB{rb_rank} ({rb_val:.2f} WoRP) is roughly equivalent to WR{wr_rank} ({wr_val:.2f} WoRP). "
                         f"The same historical value survives about {rank_gap} positional ranks deeper at RB. "
-                        "Because RB and WR compete directly for FLEX capacity, do not assume the deeper RB is the lesser roster asset."
+                        "Because RB and WR compete directly for flexible-slot capacity, including RB/WR-only slots, do not assume the deeper RB is the lesser roster asset."
                     ),
                     min(1.8, 1.05 + rank_gap * 0.025), 1.30, 1.60,
                     {"position_a": "RB", "position_b": "WR", "deeper_position": "RB",
                      "shallower_position": "WR", "deeper_rank": rb_rank,
                      "shallower_rank": wr_rank, "rank_gap": rank_gap,
                      "worp_a": rb_val, "worp_b": wr_val, "worp_gap": diff,
-                     "shared_slot": "FLEX", "decision_relevance": 1.0},
+                     "shared_slot": ("FLEX + WRRB_FLEX" if int(flex) > 0 and int(rbwr_flex) > 0 else "FLEX" if int(flex) > 0 else "WRRB_FLEX"), "decision_relevance": 1.0},
                 )
 
     # Rebuild story-ID map after adding the decision-relevant equivalence.
@@ -1300,7 +1309,7 @@ def calculate_league_intelligence_cached(
                 1.75, 1.40, 1.70,
                 {"elite_advantage": elite_adv, "rb_rank": rb_rank, "wr_rank": wr_rank,
                  "rb_worp": rb_val, "wr_worp": wr_val, "rank_gap": rank_gap,
-                 "shared_slot": "FLEX"},
+                 "shared_slot": ("FLEX + WRRB_FLEX" if int(flex) > 0 and int(rbwr_flex) > 0 else "FLEX" if int(flex) > 0 else "WRRB_FLEX")},
             )
             synth = [c for c in story_candidates if c.get("story_id") == "rb_top_and_depth_synth"]
             candidates.extend(synth[-1:])
@@ -1793,6 +1802,9 @@ def calculate_league_intelligence_cached(
 
 calc_key = (
     league.get("league_id"),
+    tuple(sorted(counts.items())),
+    tuple(league.get("roster_positions", []) or []),
+    json.dumps(league.get("scoring_settings", {}) or {}, sort_keys=True),
     selected_seasons,
     int(n_sims_ui),
 )
@@ -1826,6 +1838,7 @@ if compute:
                 scoring_json,
                 seasons=selected_seasons,
                 n_sims=int(n_sims_ui),
+                rbwr_flex=counts.get("WRRB_FLEX", 0),
             )
 
             st.session_state["worp_result_key"] = calc_key
@@ -2028,6 +2041,7 @@ else:
                 wr=int(counts.get("WR", 0)), te=int(counts.get("TE", 0)),
                 flex=int(counts.get("FLEX", 0)), superflex=int(counts.get("SUPER_FLEX", 0)),
                 scoring=league.get("scoring_settings", {}) or {},
+                rbwr_flex=int(counts.get("WRRB_FLEX", 0)),
             )
             st.markdown(f"**{reading['headline']}**  \n{reading['thesis']}")
             metric_a, metric_b, metric_c = st.columns(3)
@@ -2036,7 +2050,7 @@ else:
             metric_c.metric("Median RB → WR rank gap", f"{reading['median_rb_wr_rank_gap']:+.0f} ranks")
 
             if not reading["equivalences"].empty:
-                st.markdown("**Shared-FLEX equivalences**")
+                st.markdown("**Flexible-slot equivalences**")
                 eq_view = reading["equivalences"].copy()
                 for col in ("RB WoRP", "WR WoRP", "TE WoRP"):
                     if col in eq_view:
@@ -2062,17 +2076,17 @@ else:
 
         _teams=int(league.get("total_rosters",0) or 0)
         _qb=int(counts.get("QB",0)); _rb=int(counts.get("RB",0)); _wr=int(counts.get("WR",0)); _te=int(counts.get("TE",0))
-        _flex=int(counts.get("FLEX",0)); _superflex=int(counts.get("SUPER_FLEX",0)); _sc=league.get("scoring_settings",{}) or {}
+        _flex=int(counts.get("FLEX",0)); _superflex=int(counts.get("SUPER_FLEX",0)); _rbwr_flex=int(counts.get("WRRB_FLEX",0)); _sc=league.get("scoring_settings",{}) or {}
 
         st.markdown("##### Lineup Economics")
         st.caption("How much of this league's expected starting-lineup scoring comes from each slot — and which positions fill flexible slots.")
         try:
             _pw,_ = load_sleeper_player_weeks([2023,2024,2025], _sc, player_map=fetch_player_map())
-            lineup_rows=build_lineup_scoring_share(_pw,_teams,_qb,_rb,_wr,_te,_flex,_superflex)
+            lineup_rows=build_lineup_scoring_share(_pw,_teams,_qb,_rb,_wr,_te,_flex,_superflex,_rbwr_flex)
             cards=[]
             for lr in lineup_rows:
                 occ=lr['occupancy']
-                is_flexible=lr['slot'].startswith('FLEX') or lr['slot'].startswith('SUPER_FLEX')
+                is_flexible=lr['slot'].startswith('FLEX') or lr['slot'].startswith('SUPER_FLEX') or lr['slot'].startswith('WRRB_FLEX')
                 mix=(''.join(f'<span>{p} {100*v:.0f}%</span>' for p,v in sorted(occ.items(),key=lambda kv:kv[1],reverse=True) if v>=0.005) if is_flexible else '')
                 cards.append(
                     f'<div class="ls-card"><div class="ls-slot">{lr["slot"]}</div>'
@@ -2093,7 +2107,7 @@ else:
 
         st.markdown("##### Roster Construction")
         try:
-            start_n=_qb+_rb+_wr+_te+_flex+_superflex
+            start_n=_qb+_rb+_wr+_te+_flex+_rbwr_flex+_superflex
             tep=float(_sc.get("bonus_rec_te",0.0))>0
             active_roster_size=start_n+int(counts.get("BN",0))+int(counts.get("BENCH",0))
             rc_path=Path("worp_roster_construction_product_ranges_v0_32.csv")
@@ -2107,6 +2121,7 @@ else:
                 teams=_teams,qb=_qb,rb=_rb,wr=_wr,te=_te,
                 flex=_flex,superflex=_superflex,
                 active_roster_size=active_roster_size,tep=tep,
+                rbwr_flex=_rbwr_flex,
             )
             from worp_roster_scenarios import render_roster_scenarios
             render_roster_scenarios(
