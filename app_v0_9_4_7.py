@@ -165,12 +165,13 @@ league = league_map[choice]
 st.subheader(league.get("name", "League"))
 st.caption(league_format_label(league) + " · " + scoring_summary(league.get("scoring_settings", {})))
 
-a,b,c,d = st.columns(4)
+a,b,c,d,e = st.columns(5)
 a.metric("Teams", league.get("total_rosters", "—"))
 counts = format_counts(league.get("roster_positions", []))
 b.metric("Starters", sum(v for k,v in counts.items() if k not in {"BN","IR","TAXI"}))
 c.metric("Superflex", counts.get("SUPER_FLEX", 0))
 d.metric("TE starters", counts.get("TE", 0))
+e.metric("RB/WR FLEX", counts.get("WRRB_FLEX", 0))
 
 with st.expander("Detected league settings"):
     st.write("Roster positions:", league.get("roster_positions", []))
@@ -209,8 +210,8 @@ st.success(
 )
 
 st.caption(
-    "Exact Sleeper scoring → frozen WoRP Engine V0.2.1 → league-specific "
-    "historical positional curve and observed player board."
+    "Exact Sleeper scoring → unchanged WoRP math with corrected slot eligibility → "
+    "league-specific historical positional curve and observed player board."
 )
 
 control_a, control_b, control_c = st.columns([1.4, 1, 1])
@@ -882,8 +883,8 @@ def calculate_league_intelligence_cached(
             ]
 
     # 2) FLEX INTERPOSITIONAL PREFERENCE
-    # Compare RB/WR/TE at several same-rank anchors inside the shared relevant
-    # pool. Require a stable winner, not a single-rank accident.
+    # Compare positions only where the format allows them to compete: RB/WR/TE
+    # in shared FLEX, or RB/WR in restricted WRRB_FLEX. Require a stable winner.
     if int(flex) + int(rbwr_flex) > 0:
         flex_positions = []
         eligible_flex_positions = ["RB", "WR", "TE"] if int(flex) > 0 else ["RB", "WR"]
@@ -934,7 +935,7 @@ def calculate_league_intelligence_cached(
                     _add_story(
                         "crosspos_flex_preference", "cross_position", flex_win,
                         4.10 + min(flex_edge, 0.8),
-                        f"For comparable FLEX-range assets, lean {flex_win} over {flex_second}",
+                        f"For comparable flexible-slot assets, lean {flex_win} over {flex_second}",
                         (
                             f"At shared rank checkpoints ({rank_text}), {flex_win} leads the eligible skill positions in "
                             f"{stable_wins} of {len(anchors)} comparisons and averages about {flex_edge:.2f} more WoRP than {flex_second}. "
@@ -1135,8 +1136,8 @@ def calculate_league_intelligence_cached(
         )
         c["score"] = float(c.get("score", 0.0)) + relevance * 0.55 + min(gap, 20.0) * 0.01
 
-    # Build a specifically RB-vs-WR equivalence candidate when both positions
-    # share FLEX eligibility and a material cross-rank equivalence exists. This
+    # Build an RB-vs-WR equivalence candidate when both positions share flexible
+    # slot eligibility and a material cross-rank equivalence exists. This
     # prevents a larger but less recurrent RB-vs-TE rank gap from monopolizing
     # the equivalence slot merely because the number is bigger.
     if int(flex) + int(rbwr_flex) > 0:
@@ -1179,14 +1180,14 @@ def calculate_league_intelligence_cached(
                     (
                         f"RB{rb_rank} ({rb_val:.2f} WoRP) is roughly equivalent to WR{wr_rank} ({wr_val:.2f} WoRP). "
                         f"The same historical value survives about {rank_gap} positional ranks deeper at RB. "
-                        "Because RB and WR compete directly for FLEX capacity, do not assume the deeper RB is the lesser roster asset."
+                        "Because RB and WR compete directly for flexible-slot capacity, including RB/WR-only slots, do not assume the deeper RB is the lesser roster asset."
                     ),
                     min(1.8, 1.05 + rank_gap * 0.025), 1.30, 1.60,
                     {"position_a": "RB", "position_b": "WR", "deeper_position": "RB",
                      "shallower_position": "WR", "deeper_rank": rb_rank,
                      "shallower_rank": wr_rank, "rank_gap": rank_gap,
                      "worp_a": rb_val, "worp_b": wr_val, "worp_gap": diff,
-                     "shared_slot": "FLEX", "decision_relevance": 1.0},
+                     "shared_slot": ("FLEX + WRRB_FLEX" if int(flex) > 0 and int(rbwr_flex) > 0 else "FLEX" if int(flex) > 0 else "WRRB_FLEX"), "decision_relevance": 1.0},
                 )
 
     # Rebuild story-ID map after adding the decision-relevant equivalence.
@@ -1308,7 +1309,7 @@ def calculate_league_intelligence_cached(
                 1.75, 1.40, 1.70,
                 {"elite_advantage": elite_adv, "rb_rank": rb_rank, "wr_rank": wr_rank,
                  "rb_worp": rb_val, "wr_worp": wr_val, "rank_gap": rank_gap,
-                 "shared_slot": "FLEX"},
+                 "shared_slot": ("FLEX + WRRB_FLEX" if int(flex) > 0 and int(rbwr_flex) > 0 else "FLEX" if int(flex) > 0 else "WRRB_FLEX")},
             )
             synth = [c for c in story_candidates if c.get("story_id") == "rb_top_and_depth_synth"]
             candidates.extend(synth[-1:])
