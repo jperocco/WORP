@@ -699,22 +699,26 @@ def calculate_league_intelligence_cached(
     # STORY E — FLEX ABSORPTION OF RB/WR/TE DEPTH
     # This is the first roster-utilization bridge, but deliberately limited to
     # legal capacity. It does NOT claim observed lineup capture or manager behavior.
-    if int(flex) >= 3:
+    if int(flex) + int(rbwr_flex) >= 3:
         wr_f, rb_f, te_f = _frontier_rank("WR"), _frontier_rank("RB"), _frontier_rank("TE")
         if wr_f is not None and rb_f is not None:
-            flexible_capacity = int(flex)
+            flexible_capacity = int(flex) + int(rbwr_flex)
+            shared_capacity = int(flex)
+            restricted_capacity = int(rbwr_flex)
             deeper_pos, deeper_f = ("WR", wr_f) if wr_f >= rb_f else ("RB", rb_f)
             _add_story(
                 "flex_depth_absorption", "lineup_capacity", deeper_pos,
                 2.75 + min(flexible_capacity, 8) * 0.10,
                 "This lineup can turn skill-position depth into starters",
                 (
-                    f"Each team has {flexible_capacity} RB/WR/TE-eligible FLEX slot{'s' if flexible_capacity != 1 else ''}. "
+                    f"Each team has {restricted_capacity} RB/WR-only flexible slot{'s' if restricted_capacity != 1 else ''} "
+                    f"and {shared_capacity} RB/WR/TE-eligible FLEX slot{'s' if shared_capacity != 1 else ''}. "
                     f"Historical replacement reaches roughly WR{wr_f} and RB{rb_f}. "
                     "In this format, useful skill-position depth has more paths into the starting lineup instead of being automatically treated as bench depth."
                 ),
                 1.15, 1.20, 1.35,
-                {"flex_per_team": flexible_capacity, "wr_frontier": wr_f,
+                {"flex_per_team": flexible_capacity, "shared_flex_per_team": shared_capacity,
+                 "rbwr_flex_per_team": restricted_capacity, "wr_frontier": wr_f,
                  "rb_frontier": rb_f, "te_frontier": te_f},
             )
 
@@ -880,9 +884,10 @@ def calculate_league_intelligence_cached(
     # 2) FLEX INTERPOSITIONAL PREFERENCE
     # Compare RB/WR/TE at several same-rank anchors inside the shared relevant
     # pool. Require a stable winner, not a single-rank accident.
-    if int(flex) > 0:
+    if int(flex) + int(rbwr_flex) > 0:
         flex_positions = []
-        for pos in ["RB", "WR", "TE"]:
+        eligible_flex_positions = ["RB", "WR", "TE"] if int(flex) > 0 else ["RB", "WR"]
+        for pos in eligible_flex_positions:
             f = _frontier_rank(pos)
             if f is not None and f >= 12:
                 flex_positions.append((pos, f))
@@ -978,8 +983,8 @@ def calculate_league_intelligence_cached(
     # Search FLEX-compatible skill positions for the strongest economically useful
     # rank equivalence. Stay before replacement and away from near-zero tail noise.
     equivalence_candidates = []
-    if int(flex) > 0:
-        skill_positions = ["RB", "WR", "TE"]
+    if int(flex) + int(rbwr_flex) > 0:
+        skill_positions = ["RB", "WR", "TE"] if int(flex) > 0 else ["RB", "WR"]
         for target_pos in skill_positions:
             target_frontier = _frontier_rank(target_pos)
             if target_frontier is None:
@@ -1134,7 +1139,7 @@ def calculate_league_intelligence_cached(
     # share FLEX eligibility and a material cross-rank equivalence exists. This
     # prevents a larger but less recurrent RB-vs-TE rank gap from monopolizing
     # the equivalence slot merely because the number is bigger.
-    if int(flex) > 0:
+    if int(flex) + int(rbwr_flex) > 0:
         rb_f = _frontier_rank("RB")
         wr_f = _frontier_rank("WR")
         if rb_f is not None and wr_f is not None:
@@ -2044,7 +2049,7 @@ else:
             metric_c.metric("Median RB → WR rank gap", f"{reading['median_rb_wr_rank_gap']:+.0f} ranks")
 
             if not reading["equivalences"].empty:
-                st.markdown("**Shared-FLEX equivalences**")
+                st.markdown("**Flexible-slot equivalences**")
                 eq_view = reading["equivalences"].copy()
                 for col in ("RB WoRP", "WR WoRP", "TE WoRP"):
                     if col in eq_view:
@@ -2101,7 +2106,7 @@ else:
 
         st.markdown("##### Roster Construction")
         try:
-            start_n=_qb+_rb+_wr+_te+_flex+_superflex
+            start_n=_qb+_rb+_wr+_te+_flex+_rbwr_flex+_superflex
             tep=float(_sc.get("bonus_rec_te",0.0))>0
             active_roster_size=start_n+int(counts.get("BN",0))+int(counts.get("BENCH",0))
             rc_path=Path("worp_roster_construction_product_ranges_v0_32.csv")
