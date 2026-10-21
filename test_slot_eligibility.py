@@ -66,6 +66,17 @@ class RestrictedFlexEligibilityTests(unittest.TestCase):
         self.assertEqual(result["start_n"], 12)
         self.assertIn("RB/WR", result["headline"])
 
+    def test_roster_construction_restricted_slot(self):
+        fixed = {"QB": 1, "RB": 0, "WR": 0, "TE": 0}
+        self.assertFalse(_can_fill({"QB": 1, "RB": 0, "WR": 0, "TE": 1}, fixed, 0, 0, 1))
+        self.assertTrue(_can_fill({"QB": 1, "RB": 1, "WR": 0, "TE": 1}, fixed, 0, 0, 1))
+
+    def test_format_key_tracks_restricted_slots(self):
+        key = format_key(12, 1, 2, 2, 1, 1, 1, rbwr_flex=4)
+        self.assertIn("Start12", key)
+        self.assertIn("RBFLEX4", key)
+
+
 
 if __name__ == "__main__":
     unittest.main()
