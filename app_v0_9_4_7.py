@@ -2115,6 +2115,7 @@ else:
                 teams=_teams,qb=_qb,rb=_rb,wr=_wr,te=_te,
                 flex=_flex,superflex=_superflex,
                 active_roster_size=active_roster_size,tep=tep,
+                rbwr_flex=_rbwr_flex,
             )
             from worp_roster_scenarios import render_roster_scenarios
             render_roster_scenarios(
