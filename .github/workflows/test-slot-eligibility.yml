@@ -18,6 +18,15 @@ jobs:
           python-version: "3.12"
       - name: Install test dependencies
         run: python -m pip install --upgrade pip pandas numpy
+      - name: Check Python syntax
+        run: >-
+          python -m py_compile
+          app_v0_9_4_7.py
+          worp_engine.py
+          worp_lineup_economics_v0_9_4.py
+          worp_league_reading_v0_9_5.py
+          worp_roster_construction_product_v0_9_4.py
+          worp_roster_scenarios.py
       - name: Run eligibility and adjacent regression tests
         run: >-
           python -m unittest
@@ -25,3 +34,5 @@ jobs:
           test_lineup_economics_v0_9_4
           test_league_reading_v0_9_5
           test_roster_scenarios
+          test_roster_construction_product_v0_9_4
+          test_empirical_win_model
