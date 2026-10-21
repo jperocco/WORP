@@ -4,6 +4,7 @@ from worp_engine import LeagueSettings, select_aggregate_starters
 from worp_lineup_economics_v0_9_4 import build_lineup_scoring_share
 from worp_league_reading_v0_9_5 import build_league_reading
 from worp_roster_scenarios import evaluate_scenario
+from worp_roster_construction_product_v0_9_4 import _can_fill, format_key
 
 
 def sample_curve():
