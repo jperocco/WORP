@@ -1,6 +1,6 @@
 import unittest
 import pandas as pd
-from worp_engine import LeagueSettings, select_aggregate_starters
+from worp_engine import LeagueSettings, select_aggregate_starters, simulate_full_team_scores, simulate_other_roster_scores
 from worp_lineup_economics_v0_9_4 import build_lineup_scoring_share
 from worp_league_reading_v0_9_5 import build_league_reading
 from worp_roster_scenarios import evaluate_scenario
@@ -29,6 +29,19 @@ class RestrictedFlexEligibilityTests(unittest.TestCase):
                                   flex=0, superflex=0, rbwr_flex=1)
         starters = select_aggregate_starters(week, settings)
         self.assertEqual(starters["player_id"].tolist(), ["RB1"])
+
+    def test_engine_simulations_include_restricted_flex_slot(self):
+        starters = pd.DataFrame([
+            {"player_id": "QB1", "position": "QB", "fantasy_points": 10.0},
+            {"player_id": "RB1", "position": "RB", "fantasy_points": 5.0},
+        ])
+        settings = LeagueSettings(teams=1, qb=1, rb=0, wr=0, te=0,
+                                  flex=0, superflex=0, rbwr_flex=1)
+        full = simulate_full_team_scores(starters, settings, n_sims=5, seed=11)
+        without_rb_slot = simulate_other_roster_scores(
+            starters, settings, "RB", n_sims=5, seed=11)
+        self.assertTrue((full == 15.0).all())
+        self.assertTrue((without_rb_slot == 10.0).all())
 
     def test_lineup_economics_restricts_occupancy(self):
         weeks = pd.DataFrame([
