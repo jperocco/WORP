@@ -18,9 +18,9 @@ class LeagueSettings:
     te: int = 1
     flex: int = 2
     superflex: int = 1
-    rbwr_flex: int = 0
     ppr: float = 0.5
     te_premium: float = 0.0
+    rbwr_flex: int = 0
 
     @property
     def fixed_slots(self) -> Dict[str, int]:
