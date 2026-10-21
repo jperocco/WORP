@@ -23,6 +23,7 @@ def build_lineup_scoring_share(
     te,
     flex,
     superflex,
+    rbwr_flex=0,
 ):
     """Return expected points and lineup share for each starting-slot layer.
 
@@ -43,13 +44,15 @@ def build_lineup_scoring_share(
     fixed = {"QB": int(qb), "RB": int(rb), "WR": int(wr), "TE": int(te)}
     flex = int(flex)
     superflex = int(superflex)
-    if any(value < 0 for value in (*fixed.values(), flex, superflex)):
+    rbwr_flex = int(rbwr_flex)
+    if any(value < 0 for value in (*fixed.values(), flex, superflex, rbwr_flex)):
         raise ValueError("Starting-slot counts cannot be negative.")
 
     slot_names = []
     for pos in POSITIONS:
         for layer in range(fixed[pos]):
             slot_names.append(pos if fixed[pos] == 1 else f"{pos}{layer + 1}")
+    slot_names.extend(f"WRRB_FLEX {layer + 1}" for layer in range(rbwr_flex))
     slot_names.extend(f"FLEX {layer + 1}" for layer in range(flex))
     slot_names.extend(f"SUPER_FLEX {layer + 1}" for layer in range(superflex))
     if not slot_names:
@@ -98,6 +101,8 @@ def build_lineup_scoring_share(
             acc[name]["positions"].extend(winners["position"].tolist())
             used.update(winners["_row_id"].tolist())
 
+        for layer in range(rbwr_flex):
+            fill_flexible(f"WRRB_FLEX {layer + 1}", ("RB", "WR"))
         for layer in range(flex):
             fill_flexible(f"FLEX {layer + 1}", ("RB", "WR", "TE"))
         for layer in range(superflex):
