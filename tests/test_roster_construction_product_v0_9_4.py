@@ -47,7 +47,7 @@ class RosterConstructionProductTests(unittest.TestCase):
         self.assertEqual(len(recover_v0_32_ranges(None, None)), 29)
 
     def test_all_uploaded_research_formats_reach_historical_path(self):
-        evidence = pd.read_csv(Path(__file__).parent / "data" / (
+        evidence = pd.read_csv(Path(__file__).resolve().parents[1] / "data" / (
             "worp_scoring_core_decision_equivalence_envelopes_v0_24.csv"
         ))
         self.assertEqual(len(evidence), 58)
@@ -72,7 +72,7 @@ class RosterConstructionProductTests(unittest.TestCase):
                         self.assertEqual(result[field], row[field])
 
     def test_uploaded_two_te_format_accounts_for_entire_roster(self):
-        evidence = pd.read_csv(Path(__file__).parent / "data" / (
+        evidence = pd.read_csv(Path(__file__).resolve().parents[1] / "data" / (
             "worp_scoring_core_decision_equivalence_envelopes_v0_24.csv"
         ))
         result = roster_construction_envelope(

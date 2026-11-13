@@ -30,9 +30,9 @@ jobs:
       - name: Run eligibility and adjacent regression tests
         run: >-
           python -m unittest
-          test_slot_eligibility
-          test_lineup_economics_v0_9_4
-          test_league_reading_v0_9_5
-          test_roster_scenarios
-          test_roster_construction_product_v0_9_4
-          test_empirical_win_model
+          tests.test_slot_eligibility
+          tests.test_lineup_economics_v0_9_4
+          tests.test_league_reading_v0_9_5
+          tests.test_roster_scenarios
+          tests.test_roster_construction_product_v0_9_4
+          tests.test_empirical_win_model
